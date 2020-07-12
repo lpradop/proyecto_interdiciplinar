@@ -18,11 +18,7 @@ class Client():
 
             self.main_window.update()  # una vez creados se dibujaran en pantalla
 
-        def listenInputEvents(self) -> None:
-            # coloca a la ventana en modo de espera(eventos)
-            pass
-
-        def createAttendanceInterface(self) -> None:
+        def createTeachInterface(self) -> None:
             # crear todos los elementos que tendra la interfaz donde se marca la asistencia
             pass
 
@@ -31,3 +27,10 @@ class Client():
             pass
 
         createLoginInterface(self)
+        # una vez creada la interface de login, colocar la ventana en modo de escucha(listen)
+
+        # cuando el boton de login sea presionado, se tiene que realizar un request al server
+        # para verificar el usuario y contrasena. El servidor devolvera un string
+        #
+        # contienendo el token de la sesion, en caso de que el string este vacio
+        # significara de que no se pudo realizar la peticion o los datos no pertenecen a una cuenta existente
