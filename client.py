@@ -12,7 +12,7 @@ class Client():
 
         def createLoginInterface(self) -> None:
 
-            login_frame = ttk.LabelFrame(self.main_menu)
+            login_frame = ttk.LabelFrame(self.main_window)
             login_frame.pack(fill=tk.BOTH, padx= ,pady= )
 
             login_username = ttk.Label(self.login_frame, text="Usuario")
