@@ -1,4 +1,5 @@
-import tkinter
+import tkinter as tk
+from tkinter import ttk
 import requests
 
 
@@ -10,8 +11,25 @@ class Client():
     def run(self) -> None:
 
         def createLoginInterface(self) -> None:
-            login_button = tkinter.Button(
-                self.main_window, text="Iniciar Sesion")
+
+            login_frame = ttk.LabelFrame(self.main_menu)
+            login_frame.pack(fill=tk.BOTH, padx= ,pady= )
+
+            login_username = ttk.Label(self.login_frame, text="Usuario")
+            login_username.grid(column= ,row= ,padx= ,pady= )
+
+            username_entry = ttk.Entry(self.login_frame)
+            username_entry.grid(column= ,row= ,padx= ,pady= )
+
+            login_password = ttk.Label(self.login_frame, text="Contraseña")
+            login_password.grid(column= ,row= ,padx= ,pady= )
+
+            password_entry= ttk.Entry(self.login_frame, show="*")
+            password_entry.grid(column= ,row= ,padx= ,pady= )
+
+            
+            login_button = tk.Button(
+                self.login_frame, text="Iniciar Sesion")
             login_button.pack(side=tkinter.RIGHT)
 
             # crear todos los elementos que tendra el la interfaz de login
