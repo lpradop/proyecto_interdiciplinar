@@ -1,0 +1,7 @@
+*
+!*.py
+!*.md
+!client_app/
+!server_app/
+!database/
+!.gitignore

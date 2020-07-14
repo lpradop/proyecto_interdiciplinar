@@ -11,35 +11,38 @@ class Client():
         self.main_window.geometry("600x500")
         self.run()
         self.main_window.mainloop()
-        
+
     def run(self):
 
         def createLoginInterface(self):
 
             login_frame = ttk.LabelFrame(self.main_window)
-            login_frame.pack(fill=tk.BOTH, padx=120,pady=100 )
+            login_frame.pack(fill=tk.BOTH, padx=120, pady=100)
 
-            fontStyle = tkFont.Font(family="Vrinda", size=30,weight='bold')
-            titulo=ttk.Label(login_frame,text="S.C.A.D",font=fontStyle)
-            titulo.grid(column=1 ,row=0 ,padx=5 ,pady=30)
+            fontStyle = tkFont.Font(family="Vrinda", size=30, weight='bold')
+            titulo = ttk.Label(login_frame, text="S.C.A.D", font=fontStyle)
+            titulo.grid(column=1, row=0, padx=5, pady=30)
 
-            fontStyle2= tkFont.Font(family="Vrinda", size=13)
+            fontStyle2 = tkFont.Font(family="Vrinda", size=13)
 
-            login_username = ttk.Label(login_frame, text="Usuario",font=fontStyle2)
-            login_username.grid(column=0 ,row=1 ,padx=5 ,pady=10 )
+            login_username = ttk.Label(
+                login_frame, text="Usuario", font=fontStyle2)
+            login_username.grid(column=0, row=1, padx=5, pady=10)
 
             username_entry = ttk.Entry(login_frame)
-            username_entry.grid(column=1 ,row=1 ,padx=5 ,pady=10 ,ipadx=20,ipady=2 )
-            
-            login_password = ttk.Label(login_frame, text="Contraseña",font=fontStyle2)
-            login_password.grid(column=0 ,row=2,padx=5 ,pady=10 )
+            username_entry.grid(column=1, row=1, padx=5,
+                                pady=10, ipadx=20, ipady=2)
+
+            login_password = ttk.Label(
+                login_frame, text="Contraseña", font=fontStyle2)
+            login_password.grid(column=0, row=2, padx=5, pady=10)
 
             password_entry = ttk.Entry(login_frame, show="*")
-            password_entry.grid(column=1 ,row=2 ,padx=5,pady=10 ,ipadx=20,ipady=2)
+            password_entry.grid(column=1, row=2, padx=5,
+                                pady=10, ipadx=20, ipady=2)
 
-        
             login_button = ttk.Button(login_frame, text="   Iniciar Sesion   ")
-            login_button.grid(column=1, row=3, padx=5, pady=15) 
+            login_button.grid(column=1, row=3, padx=5, pady=15)
 
             # crear todos los elementos que tendra el la interfaz de login
 
@@ -52,7 +55,7 @@ class Client():
         def createAdminInterface(self):
             # interfaz que vera el admin
             pass
-        
+
         createLoginInterface(self)
         # una vez creada la interface de login, colocar la ventana en modo de escucha(listen)
 
