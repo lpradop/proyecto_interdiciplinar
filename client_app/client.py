@@ -10,7 +10,6 @@ class Client():
         self.main_window = tk.Tk()
         self.main_window.geometry("600x500")
         self.run()
-        self.main_window.mainloop()
 
     def run(self):
 
@@ -46,7 +45,9 @@ class Client():
 
             # crear todos los elementos que tendra el la interfaz de login
 
-            self.main_window.update()  # una vez creados se dibujaran en pantalla
+            while True:
+                self.main_window.update()  # una vez creados se dibujaran en pantalla
+                self.main_window.update_idletasks()
 
         def createTeachInterface(self):
             # crear todos los elementos que tendra la interfaz donde se marca la asistencia

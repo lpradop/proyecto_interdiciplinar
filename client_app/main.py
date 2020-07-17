@@ -1,4 +1,4 @@
-from client import *
+import client
 
-test = Client()
+test = client.Client()
 
