@@ -2,7 +2,7 @@
 # futuras peticiones, se requiere un nombre de usuario y contrasena validos
 [login]
 request={Usuario:str,Contrasena:str}
-response={success:bool, type: str}
+response={success:bool, account_type: str}
 type = "GET"
 
 [teacher_course_list]
@@ -15,6 +15,10 @@ request={CursoNombre:str, HoraInicio:str, HoraFin:str}
 response={success:bool}
 type = "POST"
 
+[logout]
+request={}
+response={success:bool}
+type = "POST"
 # curso pasado   check
 # curso pasado   x
 # curso pasado   x
