@@ -1,0 +1,23 @@
+#el servidor genera una sesion temporal el cual se usara  en
+# futuras peticiones, se requiere un nombre de usuario y contrasena validos
+[login]
+type="GET"
+request={username:str,password:str}
+response={success:bool}
+[teacher_course_list]
+type="GET"
+request={}
+response={{name:str,start:str,end:str, mark_state:str }}
+
+[teacher_mark]
+type= "POST"
+request={token:str, name:str, start:str, end:str}
+response={success:bool}
+
+
+# curso pasado   check
+# curso pasado   x
+# curso pasado   x
+# curso ahora    |marcar|
+# curso futuro  
+# curso futuro 
