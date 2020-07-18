@@ -9,7 +9,7 @@ class Client():
     def __init__(self):
         self.main_window = tk.Tk()
         self.main_window.geometry("800x800")
-        self.interface_state: str = "login"
+        self.interface_state: str = "login" #posible estados: login, teacher, admin
         self.run()
 
     def createLoginInterface(self) -> None:

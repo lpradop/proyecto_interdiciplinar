@@ -1,19 +1,19 @@
 #el servidor genera una sesion temporal el cual se usara  en
 # futuras peticiones, se requiere un nombre de usuario y contrasena validos
 [login]
-type="GET"
-request={username:str,password:str}
-response={success:bool}
+request={Usuario:str,Contrasena:str}
+response={success:bool, type: str}
+type = "GET"
+
 [teacher_course_list]
-type="GET"
-request={}
-response={{name:str,start:str,end:str, mark_state:str }}
+response={{CursoNombre:str,HoraInicio:str,HoraFin:str, Salon:str, Pabellon:str mark_state:str }}
+request = {}
+type = "GET"
 
 [teacher_mark]
-type= "POST"
-request={token:str, name:str, start:str, end:str}
+request={CursoNombre:str, HoraInicio:str, HoraFin:str}
 response={success:bool}
-
+type = "POST"
 
 # curso pasado   check
 # curso pasado   x
@@ -21,3 +21,5 @@ response={success:bool}
 # curso ahora    |marcar|
 # curso futuro  
 # curso futuro 
+
+
