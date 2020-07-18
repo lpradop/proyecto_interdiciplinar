@@ -51,17 +51,16 @@ class Client():
             self.main_window.update()  # una vez creados se dibujaran en pantalla
         login_frame.destroy()
 
-    def createTeachInterface(self) -> None:
+    def createTeacherInterface(self) -> None:
         # crear todos los elementos que tendra la interfaz donde se marca la asistencia
         pass
 
     def createAdminInterface(self) -> None:
         # interfaz que vera el admin
         pass
+    def makeRequest(self,type:str,json:str):
 
-    def makeRequest(self, type: str, json_payload: str) -> str:
         print("realizando request")
-        print("cambio a interface de docente")
         self.interface_state = "teacher"
 
     def run(self):
