@@ -56,7 +56,7 @@ def teacherFullname() -> dict:
         query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
         db_cursor.execute(query, (session["Usuario"],))
         response = db_cursor.fetchall()
-        
+
         return {"Nombre": response["Nombre"], "Apellido": response["Apellido"]}
 
 
