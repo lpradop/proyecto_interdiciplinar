@@ -7,8 +7,8 @@ db = sql.connect(
     password="brocolio",
     database="scad"
 )
-db_cursor = db.cursor(buffered=True)
-query: str = "select * from Docente where Usuario='lpradop' and Contrasena='lpradop';"
-response = db_cursor.execute(query, multi=True)
-for (Nombre,Apellido) in response:
-    print("uhenoaue")
+db_cursor = db.cursor(dictionary=True, buffered=True)
+query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
+db_cursor.execute(query, ('lpradop','lpradop'))
+response = db_cursor.fetchall()
+print(response)

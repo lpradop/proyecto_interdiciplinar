@@ -5,6 +5,7 @@ from flask import session
 from datetime import timedelta
 import mysql.connector as sql
 
+#export FLASK_APP=main.py
 app = Flask(__name__)
 app.secret_key = "clave ultra secreta"
 app.permanent_session_lifetime = timedelta(minutes=10)
@@ -15,23 +16,23 @@ db = sql.connect(
     password="brocolio",
     database="scad"
 )
-db_cursor = db.cursor(dictionary=True)
+db_cursor = db.cursor(dictionary=True, buffered=True)
 
 
-@app.route("/login", methods=['GET'])
+@app.route("/login", methods=['POST'])
 def login() -> dict:
     data = request.get_json()
     # consulta a la base de datos si el usuario y contrasena son validos
-    query: str = "select * from Docente where Usuario={} and Contrasena={};".format(
-        data["Usuario"], data["Contrasena"])
-    response = db_cursor.execute(query)
+    query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
+    db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
+    response = db_cursor.fetchall()
 
     if(len(response) == 0):
         # no valido
         return {"success": False}
     else:
         # valido, proceder a crear la sesion
-        session = response[0]
+        session["Usuario"]=data["Usuario"]
         session.permanent = True
 
         return {"success": True}
