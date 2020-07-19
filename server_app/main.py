@@ -44,7 +44,12 @@ def login() -> dict:
         return {"success": False}
     else:
         # valido, proceder a crear la sesion
-        session["Usuario"] = data["Usuario"]
+        if account_type == "Docente":
+            session["Nombre"] = response_docente["Nombre"]
+            session["Apellido"] = response_docente["Apellido"]
+            session["Usuario"] = response_docente["Usuario"]
+        elif account_type == "Administrador":
+            session["Usuario"] = response_administrador["Usuario"]
         session.permanent = True
 
         return {"success": True, "type": account_type}
@@ -55,11 +60,7 @@ def teacherFullname() -> dict:
     if session.new:
         return {}
     else:
-        query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
-        db_cursor.execute(query, (session["Usuario"],))
-        response = db_cursor.fetchall()
-
-        return {"Nombre": response["Nombre"], "Apellido": response["Apellido"]}
+        return {"Nombre": session["Nombre"], "Apellido": session["Apellido"]}
 
 
 @app.route("/time", methods=['GET'])
