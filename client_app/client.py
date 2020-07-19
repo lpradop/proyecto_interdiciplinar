@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
 #import requests
-from PIL import Image, ImageTk
 import os.path as path
 
 
