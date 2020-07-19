@@ -1,0 +1,29 @@
+#el servidor genera una sesion temporal el cual se usara  en
+# futuras peticiones, se requiere un nombre de usuario y contrasena validos
+[login]
+request={Usuario:str,Contrasena:str}
+response={success:bool, account_type: str}
+type = "GET"
+
+[teacher_course_list]
+response=[{CursoNombre:str,HoraInicio:str,HoraFin:str, Salon:str, Pabellon:str, Estado:str }]
+request = {}
+type = "GET"
+
+[teacher_mark]
+request={CursoNombre:str, HoraInicio:str, HoraFin:str}
+response={success:bool}
+type = "POST"
+
+[logout]
+request={}
+response={success:bool}
+type = "POST"
+# curso pasado   check
+# curso pasado   x
+# curso pasado   x
+# curso ahora    |marcar|
+# curso futuro  
+# curso futuro 
+
+
