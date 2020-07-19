@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkFont
 #import requests
+from PIL import Image, ImageTk
+import os.path as path
 
 
 class Client():
@@ -10,7 +12,8 @@ class Client():
         self.main_window = tk.Tk()
         self.main_window.geometry("800x800")
 
-        self.image_background = tk.PhotoImage(file="Fondo-total.png")
+        self.image_background = tk.PhotoImage(
+            file=path.abspath("client_app/res/background.png"))
         self.background = tk.Label(
             self.main_window, image=self.image_background)
         self.background.place(x=0, y=0)
