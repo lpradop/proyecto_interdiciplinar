@@ -2,7 +2,10 @@
 !*.py
 !*.md
 !*.toml
+!*.png
+!*.otf
 !client_app/
+!client_app/res/
 !server_app/
 !database/
 !.gitignore
