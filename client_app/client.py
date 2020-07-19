@@ -10,6 +10,7 @@ class Client():
     def __init__(self):
         self.main_window = tk.Tk()
         self.main_window.geometry("800x800")
+        self.main_window.title("S.C.A.D.")
 
         self.image_background = tk.PhotoImage(
             file=path.abspath("client_app/res/background.png"))
