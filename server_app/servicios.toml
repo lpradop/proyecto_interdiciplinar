@@ -6,7 +6,7 @@ response={success:bool, account_type: str}
 type = "GET"
 
 [teacher_course_list]
-response={{CursoNombre:str,HoraInicio:str,HoraFin:str, Salon:str, Pabellon:str mark_state:str }}
+response=[{CursoNombre:str,HoraInicio:str,HoraFin:str, Salon:str, Pabellon:str, Estado:str }]
 request = {}
 type = "GET"
 
