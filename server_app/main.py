@@ -2,6 +2,8 @@ from flask import Flask
 from flask import request
 from flask import session
 from datetime import timedelta
+from datetime import datetime
+
 import mysql.connector as sql
 
 # export FLASK_APP=main.py
@@ -62,7 +64,8 @@ def teacherFullname() -> dict:
 
 @app.route("/time", methods=['GET'])
 def time() -> dict:
-    pass
+    current_time = datetime.now()
+    return {"fecha": current_time.strftime("%d/%m/%Y"), "hora": current_time.strftime("%H,%M")}
 
 
 @app.route("/teacher_course_list", methods=['GET'])
