@@ -64,7 +64,7 @@ def login() -> dict:
         session.permanent = True
 
         db_cursor.close()
-        return make_response(jsonify({"success": True, "type": account_type}, 200))
+        return ({"success": True, "type": account_type})
 
 
 @ app.route("/teacher_fullname", methods=['GET'])

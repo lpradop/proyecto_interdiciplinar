@@ -1,8 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 import tkinter.font as tkFont
 import requests
 import os.path as path
+# export FLASK_APP=server_app/main.py
 
 
 class Client():
@@ -11,9 +13,11 @@ class Client():
         self.main_window = tk.Tk()
         self.main_window.geometry("800x800")
         self.main_window.title("S.C.A.D.")
-        self.canvas = tk.Canvas(self.main_window, height=800, width=800)
+        self.main_window.resizable(0, 0)
 
-        # cargar imagenes
+        self.canvas = tk.Canvas(self.main_window, height=800, width=800)
+        self.canvas.place(x=0, y=0)
+
         self.image_background = tk.PhotoImage(
             file=path.abspath("client_app/res/background.png"))
         # self.image_marked = tk.PhotoImage(file=path.abspath(
@@ -22,52 +26,55 @@ class Client():
         # "client_app/res/box_unmarked.png"))
         # self.image_to_mark = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_to_mark.png"))
-        self.canvas.place(x=0, y=0)
+
         self.canvas.create_image(
             0, 0, image=self.image_background, anchor="nw")
-        self.main_window.resizable(0, 0)
         # posibles estados: Login, Docente, Administrador
         self.interface_state: str = "Login"
         self.run()
 
     def createLoginInterface(self) -> None:
-        def login(self):
-            response = self.makeRequest("POST", "login", {
-                "Usuario": "brocolio", "Contrasena": "brocolio"})
-            response=response[0]    
+        def login(self, username_entry: ttk.Entry, password_entry: ttk.Entry):
+
+            data = {"Usuario": str, "Contrasena": str}
+            data["Usuario"] = username_entry.get()
+            data["Contrasena"] = password_entry.get()
+            response = self.makeRequest("POST", "login", data)
             if response["success"]:
-                # self.interface_state = response["type"]
-                print(response["type"])
+                self.interface_state = response["type"]
+            else:
+                tk.messagebox.showerror("", "usuario o contrasena invalidos")
 
         # se crean todos los elementos que tendra la interfaz de login
-        self.canvas.create_text(250, 200, text="Bienvenido",
-                                font="Verdana 30 bold", fill="white", anchor="nw")
-
-        self.canvas.create_text(250, 280, text="Usuario:",
-                                font="Verdana 18 bold", fill="white", anchor="nw")
-        # username
         username_entry = ttk.Entry(self.main_window, font="Verdana 14")
-        self.canvas.create_window(
-            250, 320, window=username_entry, anchor="nw", width="300")
-
-        self.canvas.create_text(250, 360, text="Contraseña:",
-                                font="Verdana 18 bold", fill="white", anchor="nw")
-        # login
         password_entry = ttk.Entry(
             self.main_window, show="*", font="Verdana 14")
-        self.canvas.create_window(
-            250, 400, window=password_entry, anchor="nw", width="300")
-
         login_button = tk.Button(
-            self.main_window, text="Iniciar Sesión", fg='#63061F', background='white', font="Verdana 15 bold", command=lambda: login(self))
-        self.canvas.create_window(
-            400, 480, window=login_button, width="200")
+            self.main_window, text="Iniciar Sesión", fg='#63061F', background='white', font="Verdana 15 bold", command=lambda: login(self, username_entry, password_entry))
+
+        login_widget_container = [
+            self.canvas.create_text(250, 200, text="Bienvenido",
+                                    font="Verdana 30 bold", fill="white", anchor="nw"),
+            self.canvas.create_text(250, 280, text="Usuario:",
+                                    font="Verdana 18 bold", fill="white", anchor="nw"),
+            self.canvas.create_text(250, 360, text="Contraseña:",
+                                    font="Verdana 18 bold", fill="white", anchor="nw"),
+            self.canvas.create_window(
+                250, 320, window=username_entry, anchor="nw", width="300"),
+            self.canvas.create_window(
+                250, 400, window=password_entry, anchor="nw", width="300"),
+            self.canvas.create_window(
+                400, 480, window=login_button, width="200")
+        ]
 
         #  mainloop pero  mejor
         while self.interface_state == "Login":
             self.main_window.update_idletasks()
             self.main_window.update()
             self.canvas.update()
+        # eliminar los widgets del canvas
+        for widget in login_widget_container:
+            self.canvas.delete(widget)
 
     def createTeacherInterface(self) -> None:
         # crear todos los elementos que tendra la interfaz donde se marca la asistencia
