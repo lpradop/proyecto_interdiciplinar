@@ -19,29 +19,37 @@ db = sql.connect(
     database="scad"
 )
 
-db_cursor = db.cursor(dictionary=True, buffered=True)
-
 
 @app.route("/login", methods=['POST'])
 def login() -> dict:
+    db_cursor = db.cursor(dictionary=True, buffered=True)
     data = request.get_json()
+
     # consulta a la base de datos si el usuario y contrasena son validos
     # consulta en la tabla docente
     query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
     db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-    response_docente = db_cursor.fetchall()
-    account_type: str
-    if(len(response_docente) == 1):
+    account_type: str=""
+    found_entry = False
+    response_docente: dict
+    response_administrador: dict
+    if(db_cursor.rowcount > 0):
         account_type = "Docente"
-    # consulta en la tabla administrador
-    query: str = "select * from Administrador where Usuario=%s and Contrasena=%s"
-    db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-    response_administrador = db_cursor.fetchall()
-    if(len(response_administrador) == 1):
-        account_type = "Administrador"
+        found_entry = True
+        response_docente = db_cursor.fetchone()
 
-    if(len(response_administrador)+len(response_docente)) == 0:
+    # consulta en la tabla administrador
+    if(not found_entry):
+        query: str = "select * from Administrador where Usuario=%s and Contrasena=%s"
+        db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
+        if(db_cursor.rowcount>0):
+            account_type = "Administrador"
+            found_entry = True
+            response_administrador = db_cursor.fetchone()
+
+    if not found_entry:
         # no valido
+        db_cursor.close()
         return {"success": False}
     else:
         # valido, proceder a crear la sesion
@@ -52,8 +60,10 @@ def login() -> dict:
         elif account_type == "Administrador":
             session["Usuario"] = response_administrador["Usuario"]
         session.permanent = True
-
+        
+        db_cursor.close()
         return {"success": True, "type": account_type}
+
 
 
 @app.route("/teacher_fullname", methods=['GET'])
