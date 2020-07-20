@@ -34,7 +34,7 @@ class Client():
         def login(self):
             response = self.makeRequest("POST", "login", {
                 "Usuario": "brocolio", "Contrasena": "brocolio"})
-            response=response.json()
+            response=response[0]    
             if response["success"]:
                 # self.interface_state = response["type"]
                 print(response["type"])
@@ -142,11 +142,11 @@ class Client():
 
         if method == "GET":
             request = requests.get("http://127.0.0.1:5000/{}".format(service))
-            return request.json
+            return request.json()
         elif method == "POST":
             request = requests.post(
                 url="http://127.0.0.1:5000/{}".format(service), json=json)
-            return request.json
+            return request.json()
         # self.interface_state = "teacher"
 
     def run(self):

@@ -3,6 +3,8 @@ from flask import request
 from flask import session
 from datetime import timedelta
 from datetime import datetime
+from flask import jsonify
+from flask import make_response
 
 import mysql.connector as sql
 
@@ -29,7 +31,7 @@ def login() -> dict:
     # consulta en la tabla docente
     query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
     db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-    account_type: str=""
+    account_type: str = ""
     found_entry = False
     response_docente: dict
     response_administrador: dict
@@ -42,7 +44,7 @@ def login() -> dict:
     if(not found_entry):
         query: str = "select * from Administrador where Usuario=%s and Contrasena=%s"
         db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-        if(db_cursor.rowcount>0):
+        if(db_cursor.rowcount > 0):
             account_type = "Administrador"
             found_entry = True
             response_administrador = db_cursor.fetchone()
@@ -60,13 +62,12 @@ def login() -> dict:
         elif account_type == "Administrador":
             session["Usuario"] = response_administrador["Usuario"]
         session.permanent = True
-        
+
         db_cursor.close()
-        return {"success": True, "type": account_type}
+        return make_response(jsonify({"success": True, "type": account_type}, 200))
 
 
-
-@app.route("/teacher_fullname", methods=['GET'])
+@ app.route("/teacher_fullname", methods=['GET'])
 def teacherFullname() -> dict:
     if session.new:
         return {}
@@ -74,13 +75,13 @@ def teacherFullname() -> dict:
         return {"Nombre": session["Nombre"], "Apellido": session["Apellido"]}
 
 
-@app.route("/time", methods=['GET'])
+@ app.route("/time", methods=['GET'])
 def time() -> dict:
     current_time = datetime.now()
     return {"fecha": current_time.strftime("%d/%m/%Y"), "hora": current_time.strftime("%H,%M")}
 
 
-@app.route("/teacher_course_list", methods=['GET'])
+@ app.route("/teacher_course_list", methods=['GET'])
 def teacherCourseList() -> dict:
     # verificar si se ha logueado
     if session.new:
@@ -94,7 +95,7 @@ def teacherCourseList() -> dict:
         return {"uhento": 5}
 
 
-@app.route("/teacher_mark", methods=['POST'])
+@ app.route("/teacher_mark", methods=['POST'])
 def teacherMark() -> dict:
 
     data: dict = request.json
@@ -105,7 +106,7 @@ def teacherMark() -> dict:
         return {"success": False}
 
 
-@app.route("/logout", methods=['POST'])
+@ app.route("/logout", methods=['POST'])
 def logout() -> dict:
 
     return {"success": True}
