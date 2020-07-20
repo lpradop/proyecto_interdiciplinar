@@ -14,6 +14,7 @@ class Client():
         self.main_window.geometry("800x800")
         self.main_window.title("S.C.A.D.")
         self.main_window.resizable(0, 0)
+        self.main_window.protocol('WM_DELETE_WINDOW', self.logout)
 
         self.canvas = tk.Canvas(self.main_window, height=800, width=800)
         self.canvas.place(x=0, y=0)
@@ -31,6 +32,7 @@ class Client():
             0, 0, image=self.image_background, anchor="nw")
         # posibles estados: Login, Docente, Administrador
         self.interface_state: str = "Login"
+        self.session=requests.Session()
         self.run()
 
     def createLoginInterface(self) -> None:
@@ -115,18 +117,18 @@ class Client():
 
                 y += height
 
-        teacher: dict=self.makeRequest("GET","teacher_fullname")
+        teacher: dict = self.makeRequest("GET", "teacher_fullname")
         date: dict = self.makeRequest("GET", "time")
 
         # nombre del docente
         self.canvas.create_rectangle(
-            450, 60, 740, 150, fill="#CAAAB3", outline="")
+            350, 60, 740, 150, fill="#CAAAB3", outline="")
         self.canvas.create_text(
-            470, 80, text="Docente:", font="Verdana 15 bold", fill="black", anchor="nw")
+            370, 80, text="Docente:", font="Verdana 15 bold", fill="black", anchor="nw")
         self.canvas.create_text(
-            470, 110, text=teacher["Nombre"]+" "+teacher["Apellido"], font="Verdana 15 bold", fill="black", anchor="nw")
+            370, 110, text=teacher["Nombre"]+" "+teacher["Apellido"], font="Verdana 15 bold", fill="black", anchor="nw")
         self.canvas.create_rectangle(
-            410, 60, 450, 150, fill="#ffffff", outline="")
+            310, 60, 350, 150, fill="white", outline="")
 
         # cabecera de la lista
         self.canvas.create_rectangle(
@@ -137,7 +139,7 @@ class Client():
         self.canvas.create_text(
             250, 215, text=date["fecha"], font="Verdana 15 bold", fill="black", anchor="nw")
 
-        createCourseList(self, [1, 2, 1, 5])
+        createCourseList(self, [1, 5])
         while self.interface_state == "Docente":
             self.main_window.update_idletasks()
             self.main_window.update()
@@ -147,22 +149,31 @@ class Client():
         # interfaz que vera el admin
         pass
 
-    def makeRequest(self, method: str, service: str, json: dict = {}) -> iter:
+    def makeRequest(self, method: str, service: str, json: dict = {} ) -> iter:
 
         if method == "GET":
-            request = requests.get("http://127.0.0.1:5000/{}".format(service))
-            return request.json()
+            response = self.session.get("http://127.0.0.1:5000/{}".format(service))
+            return response.json()
         elif method == "POST":
-            request = requests.post(
+            response = self.session.post(
                 url="http://127.0.0.1:5000/{}".format(service), json=json)
-            return request.json()
-        # self.interface_state = "teacher"
+            return response.json()
+        elif method == "DELETE":
+            response = self.session.delete(
+                url="http://127.0.0.1:5000/{}".format(service))
+            return response
+
+    def logout(self):
+        self.makeRequest("DELETE", "logout")
+        self.main_window.destroy()
 
     def run(self):
 
         # ejecucion del programa
         self.createLoginInterface()
+        # if state=techar
         self.createTeacherInterface()
+        # elif tstate=admni
         # una vez creada la interface de login, colocar la ventana en modo de escucha(listen)
 
         # cuando el boton de login sea presionado, se tiene que realizar un request al server

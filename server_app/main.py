@@ -12,7 +12,7 @@ import mysql.connector as sql
 # python -m flask run
 # INSERT INTO AsignacionCurso(DocenteDNI,CursoNombre,SalonID,HoraInicio,HoraFin,Dia) values ('77675913','Estructuras Discretas 1',(select SalonID from Salon where Numero='105' and Pabellon='Sistemas'),'14:00:00','16:00:00','Lunes');
 app = Flask(__name__)
-app.secret_key = "clave ultra secreta"
+app.config["SECRET_KEY"] = "clave ultra secreta"
 app.permanent_session_lifetime = timedelta(minutes=10)
 
 db = sql.connect(
@@ -30,9 +30,9 @@ def login() -> dict:
 
     # consulta a la base de datos si el usuario y contrasena son validos
     # consulta en la tabla docente
-    query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
+    query: str = "select * from Docente where Usuario=%s and Contrasena=%s;"
     db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-    account_type: str = ""
+    account_type: str
     found_entry = False
     response_docente: dict
     response_administrador: dict
@@ -60,6 +60,9 @@ def login() -> dict:
 
         if account_type == "Docente":
             session["Usuario"] = response_docente["Usuario"]
+            session["Nombre"] = response_docente["Nombre"]
+            session["Apellido"] = response_docente["Apellido"]
+
         elif account_type == "Administrador":
             session["Usuario"] = response_administrador["Usuario"]
 
@@ -69,11 +72,10 @@ def login() -> dict:
 
 @ app.route("/teacher_fullname", methods=['GET'])
 def teacherFullname() -> dict:
-    if session.new:
+    if session.get("Nombre") is None or session.get("Apellido") is None:
         return {}
     else:
-        print("uheosna")
-        return {"Nombre": "nombre", "Apellido": "apellido"}
+        return {"Nombre": session["Nombre"], "Apellido": session["Apellido"]}
 
 
 @ app.route("/time", methods=['GET'])
@@ -107,8 +109,9 @@ def teacherMark() -> dict:
         return {"success": False}
 
 
-@ app.route("/logout", methods=['POST'])
+@ app.route("/logout", methods=['DELETE'])
 def logout() -> dict:
-    session.pop('Usuario', None)
-
+    session.pop("Usuario", None)
+    session.pop("Nombre", None)
+    session.pop("Apellido", None)
     return {"success": True}
