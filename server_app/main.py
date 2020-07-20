@@ -7,6 +7,7 @@ from datetime import datetime
 import mysql.connector as sql
 
 # export FLASK_APP=main.py
+# INSERT INTO AsignacionCurso(DocenteDNI,CursoNombre,SalonID,HoraInicio,HoraFin,Dia) values ('77675913','Estructuras Discretas 1',(select SalonID from Salon where Numero='105' and Pabellon='Sistemas'),'14:00:00','16:00:00','Lunes');
 app = Flask(__name__)
 app.secret_key = "clave ultra secreta"
 app.permanent_session_lifetime = timedelta(minutes=10)
@@ -76,7 +77,6 @@ def teacherCourseList() -> dict:
         return {}
     else:
         # consultar la lista de cursos usando la session
-
         course_list: list
         # query: str = "select * from Docente where Usuario=%s and Contrasena=%s"
         # db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
