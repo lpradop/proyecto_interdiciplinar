@@ -44,8 +44,10 @@ class Client():
                 self.interface_state = response["type"]
             else:
                 tk.messagebox.showerror("", "usuario o contrasena invalidos")
+                password_entry.delete(0, tk.END)
 
         # se crean todos los elementos que tendra la interfaz de login
+
         username_entry = ttk.Entry(self.main_window, font="Verdana 14")
         password_entry = ttk.Entry(
             self.main_window, show="*", font="Verdana 14")
@@ -113,7 +115,7 @@ class Client():
 
                 y += height
 
-        teacher: dict
+        teacher: dict=self.makeRequest("GET","teacher_fullname")
         date: dict = self.makeRequest("GET", "time")
 
         # nombre del docente
@@ -122,7 +124,7 @@ class Client():
         self.canvas.create_text(
             470, 80, text="Docente:", font="Verdana 15 bold", fill="black", anchor="nw")
         self.canvas.create_text(
-            470, 110, text="Nombres", font="Verdana 15 bold", fill="black", anchor="nw")
+            470, 110, text=teacher["Nombre"]+" "+teacher["Apellido"], font="Verdana 15 bold", fill="black", anchor="nw")
         self.canvas.create_rectangle(
             410, 60, 450, 150, fill="#ffffff", outline="")
 

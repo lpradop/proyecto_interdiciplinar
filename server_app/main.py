@@ -4,11 +4,12 @@ from flask import session
 from datetime import timedelta
 from datetime import datetime
 from flask import jsonify
-from flask import make_response
+
 
 import mysql.connector as sql
-
+# cd Documents/code/UNSA/proyecto_interdiciplinar/server_app/
 # export FLASK_APP=main.py
+# python -m flask run
 # INSERT INTO AsignacionCurso(DocenteDNI,CursoNombre,SalonID,HoraInicio,HoraFin,Dia) values ('77675913','Estructuras Discretas 1',(select SalonID from Salon where Numero='105' and Pabellon='Sistemas'),'14:00:00','16:00:00','Lunes');
 app = Flask(__name__)
 app.secret_key = "clave ultra secreta"
@@ -55,13 +56,12 @@ def login() -> dict:
         return {"success": False}
     else:
         # valido, proceder a crear la sesion
+        session.permanent = True
+
         if account_type == "Docente":
-            session["Nombre"] = response_docente["Nombre"]
-            session["Apellido"] = response_docente["Apellido"]
             session["Usuario"] = response_docente["Usuario"]
         elif account_type == "Administrador":
             session["Usuario"] = response_administrador["Usuario"]
-        session.permanent = True
 
         db_cursor.close()
         return ({"success": True, "type": account_type})
@@ -72,7 +72,8 @@ def teacherFullname() -> dict:
     if session.new:
         return {}
     else:
-        return {"Nombre": session["Nombre"], "Apellido": session["Apellido"]}
+        print("uheosna")
+        return {"Nombre": "nombre", "Apellido": "apellido"}
 
 
 @ app.route("/time", methods=['GET'])
@@ -108,5 +109,6 @@ def teacherMark() -> dict:
 
 @ app.route("/logout", methods=['POST'])
 def logout() -> dict:
+    session.pop('Usuario', None)
 
     return {"success": True}
