@@ -43,7 +43,7 @@ class Client():
             data["Contrasena"] = password_entry.get()
             response = self.makeRequest("POST", "login", data)
             if response["success"]:
-                self.interface_state = response["type"]
+                self.interface_state = response["account_type"]
             else:
                 tk.messagebox.showerror("", "usuario o contrasena invalidos")
                 password_entry.delete(0, tk.END)

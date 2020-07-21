@@ -4,6 +4,7 @@ from flask import session
 from datetime import timedelta
 from datetime import datetime
 from flask import jsonify
+from flask import make_response
 
 
 import mysql.connector as sql
@@ -63,7 +64,7 @@ def login() -> dict:
 @ app.route("/teacher_fullname", methods=['GET'])
 def teacherFullname() -> dict:
     if session.get("Nombre") is None or session.get("Apellido") is None:
-        return {}
+        return {}  # return forbidden
     else:
         return {"Nombre": session["Nombre"], "Apellido": session["Apellido"]}
 
@@ -101,7 +102,14 @@ def teacherMark() -> dict:
 
 @ app.route("/logout", methods=['DELETE'])
 def logout() -> dict:
-    session.pop("Usuario", None)
-    session.pop("Nombre", None)
-    session.pop("Apellido", None)
-    return {"success": True}
+    if session.get("account_type") is None:
+        return {}
+    else:
+        if session["account_type"] == "Docente":
+            session.pop("Usuario")
+            session.pop("Nombre")
+            session.pop("Apellido")
+            return {"success": True}
+        elif session["account_type"] == "Administrador":
+            session.pop("Usuario")
+            return {"success": True}
