@@ -32,42 +32,32 @@ def login() -> dict:
     # consulta en la tabla docente
     query: str = "select * from Docente where Usuario=%s and Contrasena=%s;"
     db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-    account_type: str
-    found_entry = False
-    response_docente: dict
-    response_administrador: dict
-    if(db_cursor.rowcount > 0):
-        account_type = "Docente"
-        found_entry = True
-        response_docente = db_cursor.fetchone()
 
-    # consulta en la tabla administrador
-    if(not found_entry):
+    if(db_cursor.rowcount > 0):
+        response: dict = db_cursor.fetchone()
+        session.permanent = True
+        session["account_type"] = "Docente"
+        session["Usuario"] = response["Usuario"]
+        session["Nombre"] = response["Nombre"]
+        session["Apellido"] = response["Apellido"]
+        db_cursor.close()
+        return ({"success": True, "account_type": session["account_type"]})
+
+    else:
+        # consulta en la tabla administrador
         query: str = "select * from Administrador where Usuario=%s and Contrasena=%s"
         db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
+        db_cursor.close()
+
         if(db_cursor.rowcount > 0):
-            account_type = "Administrador"
-            found_entry = True
-            response_administrador = db_cursor.fetchone()
-
-    if not found_entry:
-        # no valido
-        db_cursor.close()
-        return {"success": False}
-    else:
-        # valido, proceder a crear la sesion
-        session.permanent = True
-
-        if account_type == "Docente":
-            session["Usuario"] = response_docente["Usuario"]
-            session["Nombre"] = response_docente["Nombre"]
-            session["Apellido"] = response_docente["Apellido"]
-
-        elif account_type == "Administrador":
-            session["Usuario"] = response_administrador["Usuario"]
-
-        db_cursor.close()
-        return ({"success": True, "type": account_type})
+            session.permanent = True
+            session["account_type"] = "Administrador"
+            response: dict = db_cursor.fetchone()
+            session["Usuario"] = response["Usuario"]
+            return ({"success": True, "account_type": session["account_type"]})
+        # no se encontro nada
+        else:
+            return {"success": False}
 
 
 @ app.route("/teacher_fullname", methods=['GET'])
