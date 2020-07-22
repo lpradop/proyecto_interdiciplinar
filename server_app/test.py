@@ -13,9 +13,10 @@
 # response = db_cursor.fetchall()
 # print(response)
 import requests
-# requests.delete("http://127.0.0.1:5000/logout")
+# response=requests.delete("http://127.0.0.1:5000/logout")
 s = requests.Session()
 response = s.post("http://127.0.0.1:5000/login",
                   json={"Usuario": "lpradop", "Contrasena": "lpradop"})
-response= s.get("http://127.0.0.1:5000/teacher_fullname")
+# response= s.get("http://127.0.0.1:5000/teacher_fullname")
+# response=s.get("http://127.0.0.1:5000/teacher_course_list")
 print(response.json())

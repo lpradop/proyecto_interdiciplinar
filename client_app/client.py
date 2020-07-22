@@ -4,12 +4,38 @@ from tkinter import messagebox
 import tkinter.font as tkFont
 import requests
 import os.path as path
-# export FLASK_APP=server_app/main.py
+
+spanish_days: dict = {
+    'Monday': 'Lunes',
+    'Tuesday': 'Martes',
+    'Wednesday': 'Miércoles',
+    'Thursday': 'Jueves',
+    'Friday': 'Viernes',
+    'Saturday': 'Sábado',
+    'Sunday': 'Domingo'
+}
+
+spanish_months: dict = {
+    "January": "Enero",
+    "February": "Febrero",
+    "March": "Marzo",
+    "April": "Abril",
+    "May": "Mayo",
+    "June": "Junio",
+    "July": "Julio",
+    "August": "Agosto",
+    "September": "Septiembre",
+    "October": "Octubre",
+    "November": "Noviembre",
+    "December": "Diciembre"
+}
 
 
 class Client():
 
-    def __init__(self):
+    def __init__(self, server_url: str):
+        self.server_url = server_url
+
         self.main_window = tk.Tk()
         self.main_window.geometry("800x800")
         self.main_window.title("S.C.A.D.")
@@ -32,21 +58,25 @@ class Client():
             0, 0, image=self.image_background, anchor="nw")
         # posibles estados: Login, Docente, Administrador
         self.interface_state: str = "Login"
-        self.session=requests.Session()
+        self.session = requests.Session()
         self.run()
 
     def createLoginInterface(self) -> None:
         def login(self, username_entry: ttk.Entry, password_entry: ttk.Entry):
 
-            data = {"Usuario": str, "Contrasena": str}
+            data: dict = {"Usuario": str, "Contrasena": str}
             data["Usuario"] = username_entry.get()
             data["Contrasena"] = password_entry.get()
+
             response = self.makeRequest("POST", "login", data)
-            if response["success"]:
-                self.interface_state = response["account_type"]
-            else:
-                tk.messagebox.showerror("", "usuario o contrasena invalidos")
+            if response.status_code == 200:
+                self.interface_state = response.json()["account_type"]
+            elif response.status_code == 401:
+                tk.messagebox.showerror(
+                    "", "usuario o contrasena invalidos")
                 password_entry.delete(0, tk.END)
+            else:
+                print("error en el server")
 
         # se crean todos los elementos que tendra la interfaz de login
 
@@ -90,15 +120,15 @@ class Client():
             height = 100
             padding = 10
 
-            for course in range(len(course_list)):
+            for course in course_list:
                 padding = 10
                 self.canvas.create_rectangle(
                     150, y+spacing, 550, y+height, fill="#CAAAB3", outline="")
 
                 # fila 1
 
-                self.canvas.create_text(160, y+spacing+padding, text="Curso",
-                                        font="Verdana 16 bold", fill="black", anchor="nw")
+                self.canvas.create_text(
+                    160, y+spacing+padding, text=course["CursoNombre"], font="Verdana 16 bold", fill="black", anchor="nw")
                 # fila 2
 
                 padding += 30
@@ -117,8 +147,11 @@ class Client():
 
                 y += height
 
-        teacher: dict = self.makeRequest("GET", "teacher_fullname")
-        date: dict = self.makeRequest("GET", "time")
+        teacher_fullname: dict = self.makeRequest(
+            "GET", "teacher_fullname").json()
+        date_now: dict = self.makeRequest("GET", "time").json()
+        course_list: list = self.makeRequest(
+            "GET", "teacher_course_list").json()
 
         # nombre del docente
         self.canvas.create_rectangle(
@@ -126,20 +159,20 @@ class Client():
         self.canvas.create_text(
             370, 80, text="Docente:", font="Verdana 15 bold", fill="black", anchor="nw")
         self.canvas.create_text(
-            370, 110, text=teacher["Nombre"]+" "+teacher["Apellido"], font="Verdana 15 bold", fill="black", anchor="nw")
+            370, 110, text=teacher_fullname["Nombre"]+" "+teacher_fullname["Apellido"], font="Verdana 15 bold", fill="black", anchor="nw")
         self.canvas.create_rectangle(
             310, 60, 350, 150, fill="white", outline="")
 
-        # cabecera de la lista
+        # Indicador de dia
         self.canvas.create_rectangle(
             150, 200, 550, 250, fill="#ffffff", outline="")
         self.canvas.create_text(
             170, 215, text="Fecha:", font="Verdana 15 bold", fill="black", anchor="nw")
 
         self.canvas.create_text(
-            250, 215, text=date["fecha"], font="Verdana 15 bold", fill="black", anchor="nw")
+            250, 215, text=date_now["date"], font="Verdana 15 bold", fill="black", anchor="nw")
 
-        createCourseList(self, [1, 5])
+        createCourseList(self, course_list)
         while self.interface_state == "Docente":
             self.main_window.update_idletasks()
             self.main_window.update()
@@ -149,25 +182,24 @@ class Client():
         # interfaz que vera el admin
         pass
 
-    def makeRequest(self, method: str, service: str, json: dict = {} ) -> iter:
+    def makeRequest(self, method: str, service: str, json: dict = {}) -> requests.  Response:
+        service_url = self.server_url+service
+        try:
+            if method == "GET":
+                return self.session.get(service_url)
+            elif method == "POST":
+                return self.session.post(url=service_url, json=json)
+            elif method == "DELETE":
+                return self.session.delete(url=service_url)
+        except requests.ConnectionError:
+            tk.messagebox.showerror(
+                "error", "No ha sido posible realizar la conexion con el servidor")
 
-        if method == "GET":
-            response = self.session.get("http://127.0.0.1:5000/{}".format(service))
-            return response.json()
-        elif method == "POST":
-            response = self.session.post(
-                url="http://127.0.0.1:5000/{}".format(service), json=json)
-            return response.json()
-        elif method == "DELETE":
-            response = self.session.delete(
-                url="http://127.0.0.1:5000/{}".format(service))
-            return response
-
-    def logout(self):
+    def logout(self) -> None:
         self.makeRequest("DELETE", "logout")
         self.main_window.destroy()
 
-    def run(self):
+    def run(self) -> None:
 
         # ejecucion del programa
         self.createLoginInterface()
