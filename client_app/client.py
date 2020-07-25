@@ -30,6 +30,8 @@ spanish_months: dict = {
     "December": "Diciembre"
 }
 
+tempImage = path.dirname(path.abspath(__file__))  # Obtiene la direccion del programa actual
+tempImage = tempImage + '\\'+"res"+ '\\'+ "background.png"  # Le agrega la direccion hasta llegar a las imagenes 
 
 class Client():
 
@@ -46,7 +48,7 @@ class Client():
         self.canvas.place(x=0, y=0)
 
         self.image_background = tk.PhotoImage(
-            file=path.abspath("client_app/res/background.png"))
+            file = tempImage) #Se le asigna la direccion de la imagen absoluta
         # self.image_marked = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_marked.png"))
         # self.image_unmarked = tk.PhotoImage(file=path.abspath(
