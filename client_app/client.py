@@ -29,13 +29,7 @@ spanish_months: dict = {
     "November": "Noviembre",
     "December": "Diciembre"
 }
-
-tempImage1 = path.dirname(path.abspath(__file__)) #obtiene la direccion del programa actual (Windows)
-tempImage1 = tempImage1 + '\\'+"res"+ '\\'+ "background.png"  # le agrega la direccion hasta llegar a las imagenes 
-
-tempImage2 = path.dirname(path.abspath(__file__)) #obtiene la direccion del programa actual (Linux)
-tempImage2 = tempImage2 + '/'+"res"+ '/'+ "background.png"  # le agrega la direccion hasta llegar a las imagenes 
-
+    
 class Client():
 
     def __init__(self, server_url: str):
@@ -49,12 +43,9 @@ class Client():
 
         self.canvas = tk.Canvas(self.main_window, height=800, width=800)
         self.canvas.place(x=0, y=0)
-
-        try:
-            self.image_background = tk.PhotoImage( file = tempImage1)
-        except:
-            self.image_background = tk.PhotoImage( file = tempImage2)
         
+        self.direccion = path.dirname(path.abspath(__file__)) + '/'+"res"+ '/'+ "background.png"  
+        self.image_background = tk.PhotoImage( file = self.direccion)
         
         # self.image_marked = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_marked.png"))
