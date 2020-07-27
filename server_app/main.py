@@ -10,7 +10,10 @@ import json
 # cd Documents/code/UNSA/proyecto_interdiciplinar/server_app/
 # export FLASK_APP=main.py
 # python -m flask run
-# INSERT INTO AsignacionCurso(DocenteDNI,CursoNombre,SalonID,HoraInicio,HoraFin,Dia) values ('77675913','Estructuras Discretas 1',(select SalonID from Salon where Numero='105' and Pabellon='Sistemas'),'14:00:00','16:00:00','Lunes');
+# INSERT INTO AsignacionCurso(DocenteDNI,CursoNombre,SalonID,HoraInicio,HoraFin
+# ,Dia) values ('77675913','Estructuras Discretas 1',(select SalonID from Salon
+# where Numero='105' and Pab
+# ellon='Sistemas'),'14:00:00','16:00:00','Lunes');
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "clave ultra secreta"
 app.permanent_session_lifetime = timedelta(minutes=10)
@@ -28,7 +31,7 @@ spanish_days: dict = {
     'Wednesday': 'Miércoles',
     'Thursday': 'Jueves',
     'Friday': 'Viernes',
-    'Saturday': 'Sábado',
+    'Saturday': 'Jueves',
     'Sunday': 'Domingo'
 }
 
