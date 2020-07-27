@@ -42,13 +42,8 @@ class Client:
 
         self.canvas = tk.Canvas(self.main_window, height=800, width=800)
         self.canvas.place(x=0, y=0)
-        self.direccion = (
-            path.dirname(path.abspath(__file__))
-            + "/"
-            + "res"
-            + "/"
-            + "background.png"
-        )
+        self.direccion = (path.dirname(path.abspath(__file__)) + "/" + "res" +
+                          "/" + "background.png")
         self.image_background = tk.PhotoImage(file=self.direccion)
         # self.image_marked = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_marked.png"))
@@ -57,9 +52,10 @@ class Client:
         # self.image_to_mark = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_to_mark.png"))
 
-        self.canvas.create_image(
-            0, 0, image=self.image_background, anchor="nw"
-        )
+        self.canvas.create_image(0,
+                                 0,
+                                 image=self.image_background,
+                                 anchor="nw")
         # posibles estados: Login, Docente, Administrador
         self.interface_state: str = "Login"
         self.session = requests.Session()
@@ -84,9 +80,9 @@ class Client:
         # se crean todos los elementos que tendra la interfaz de login
 
         username_entry = ttk.Entry(self.main_window, font="Verdana 14")
-        password_entry = ttk.Entry(
-            self.main_window, show="*", font="Verdana 14"
-        )
+        password_entry = ttk.Entry(self.main_window,
+                                   show="*",
+                                   font="Verdana 14")
         login_button = tk.Button(
             self.main_window,
             text="Iniciar Sesión",
@@ -121,15 +117,20 @@ class Client:
                 fill="white",
                 anchor="nw",
             ),
-            self.canvas.create_window(
-                250, 320, window=username_entry, anchor="nw", width="300"
-            ),
-            self.canvas.create_window(
-                250, 400, window=password_entry, anchor="nw", width="300"
-            ),
-            self.canvas.create_window(
-                400, 480, window=login_button, width="200"
-            ),
+            self.canvas.create_window(250,
+                                      320,
+                                      window=username_entry,
+                                      anchor="nw",
+                                      width="300"),
+            self.canvas.create_window(250,
+                                      400,
+                                      window=password_entry,
+                                      anchor="nw",
+                                      width="300"),
+            self.canvas.create_window(400,
+                                      480,
+                                      window=login_button,
+                                      width="200"),
         ]
 
         #  mainloop pero  mejor
@@ -215,18 +216,19 @@ class Client:
 
                 y += height
 
-        teacher_fullname: dict = self.makeRequest(
-            "GET", "teacher_fullname"
-        ).json()
+        teacher_fullname: dict = self.makeRequest("GET",
+                                                  "teacher_fullname").json()
         date_now: dict = self.makeRequest("GET", "time").json()
-        course_list: list = self.makeRequest(
-            "GET", "teacher_course_list"
-        ).json()
+        course_list: list = self.makeRequest("GET",
+                                             "teacher_course_list").json()
 
         # nombre del docente
-        self.canvas.create_rectangle(
-            350, 60, 740, 150, fill="#CAAAB3", outline=""
-        )
+        self.canvas.create_rectangle(350,
+                                     60,
+                                     740,
+                                     150,
+                                     fill="#CAAAB3",
+                                     outline="")
         self.canvas.create_text(
             370,
             80,
@@ -238,21 +240,26 @@ class Client:
         self.canvas.create_text(
             370,
             110,
-            text=teacher_fullname["Nombre"]
-            + " "
-            + teacher_fullname["Apellido"],
+            text=teacher_fullname["Nombre"] + " " +
+            teacher_fullname["Apellido"],
             font="Verdana 15 bold",
             fill="black",
             anchor="nw",
         )
-        self.canvas.create_rectangle(
-            310, 60, 350, 150, fill="white", outline=""
-        )
+        self.canvas.create_rectangle(310,
+                                     60,
+                                     350,
+                                     150,
+                                     fill="white",
+                                     outline="")
 
         # Indicador de dia
-        self.canvas.create_rectangle(
-            150, 200, 550, 250, fill="#ffffff", outline=""
-        )
+        self.canvas.create_rectangle(150,
+                                     200,
+                                     550,
+                                     250,
+                                     fill="#ffffff",
+                                     outline="")
         self.canvas.create_text(
             170,
             215,
@@ -281,9 +288,10 @@ class Client:
         # interfaz que vera el admin
         pass
 
-    def makeRequest(
-        self, method: str, service: str, json: dict = {}
-    ) -> requests.Response:
+    def makeRequest(self,
+                    method: str,
+                    service: str,
+                    json: dict = {}) -> requests.Response:
         service_url = self.server_url + service
         try:
             if method == "GET":
@@ -304,5 +312,4 @@ class Client:
 
     def run(self) -> None:
         self.createLoginInterface()
-        # if state=techar
         self.createTeacherInterface()
