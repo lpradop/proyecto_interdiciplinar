@@ -42,9 +42,9 @@ class Client:
 
         self.canvas = tk.Canvas(self.main_window, height=800, width=800)
         self.canvas.place(x=0, y=0)
-        self.direccion = (path.dirname(path.abspath(__file__)) + "/" + "res" +
-                          "/" + "background.png")
-        self.image_background = tk.PhotoImage(file=self.direccion)
+        background_path = (path.dirname(path.abspath(__file__)) + "/" + "res" +
+                           "/" + "background.png")
+        self.image_background = tk.PhotoImage(file=background_path)
         # self.image_marked = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_marked.png"))
         # self.image_unmarked = tk.PhotoImage(file=path.abspath(
@@ -75,7 +75,7 @@ class Client:
                 tk.messagebox.showerror("", "usuario o contrasena invalidos")
                 password_entry.delete(0, tk.END)
             else:
-                print("error en el server")
+                print("error en el server, help!!!")
 
         # se crean todos los elementos que tendra la interfaz de login
 
