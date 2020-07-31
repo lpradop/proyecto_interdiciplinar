@@ -44,13 +44,21 @@ class Client:
         self.canvas.place(x=0, y=0)
         background_path = (path.dirname(path.abspath(__file__)) + "/" + "res" +
                            "/" + "background.png")
+        marcado_path = (path.dirname(path.abspath(__file__)) + "/" + "res" +
+                           "/" + "Checked.png") 
+        no_marcado_path = (path.dirname(path.abspath(__file__)) + "/" + "res" +
+                           "/" + "unChecked.png") 
         self.image_background = tk.PhotoImage(file=background_path)
+        self.image_marked = tk.PhotoImage(file=marcado_path)
+        self.image_unmarked = tk.PhotoImage(file=no_marcado_path)
         # self.image_marked = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_marked.png"))
         # self.image_unmarked = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_unmarked.png"))
         # self.image_to_mark = tk.PhotoImage(file=path.abspath(
         # "client_app/res/box_to_mark.png"))
+        
+        self.marcar_button = tk.Button(self.main_window , text="Marcar", fg="#63061F", background="white", font="Verdana 8 bold" )
 
         self.canvas.create_image(0,
                                  0,
@@ -155,10 +163,13 @@ class Client:
 
             for course in course_list:
                 padding = 10
+                horaI = course["HoraInicio"] + ""
+                horaF = course["HoraFin"] + ""
+                
                 self.canvas.create_rectangle(
                     150,
                     y + spacing,
-                    550,
+                    600,
                     y + height,
                     fill="#CAAAB3",
                     outline="",
@@ -180,7 +191,7 @@ class Client:
                 self.canvas.create_text(
                     160,
                     y + spacing + padding,
-                    text="inicia:",
+                    text="Inicia: "+ horaI[:-3],
                     font="Verdana 14 bold",
                     fill="#494949",
                     anchor="nw",
@@ -188,7 +199,7 @@ class Client:
                 self.canvas.create_text(
                     350,
                     y + spacing + padding,
-                    text="salon:",
+                    text="Salón: "+ course["Numero"],
                     font="Verdana 14 bold",
                     fill="#494949",
                     anchor="nw",
@@ -200,7 +211,7 @@ class Client:
                 self.canvas.create_text(
                     160,
                     y + spacing + padding,
-                    text="termina:",
+                    text="Termina: "+ horaF[:-3],
                     font="Verdana 14 bold",
                     fill="#494949",
                     anchor="nw",
@@ -208,12 +219,58 @@ class Client:
                 self.canvas.create_text(
                     350,
                     y + spacing + padding,
-                    text="pabellon:",
+                    text="Pabellón: "+  course["Pabellon"],
                     font="Verdana 14 bold",
                     fill="#494949",
                     anchor="nw",
                 )
+                
+                
+                #fila Marcación
+               
+                state1 = "marcado"
+                state2 = "nomarcado"
+                state3 = "pomarcar"
+                state4 = "esperando"
 
+                self.canvas.create_rectangle(
+                    615,
+                    y + spacing,
+                    710,
+                    y + height,
+                    fill="#CAAAB3",
+                    outline="",
+                )
+
+                state = state3
+
+                if  state == state1:
+
+                    self.canvas.create_image(
+                                            635,
+                                            y + spacing*2.5,
+                                            image=self.image_marked,
+                                            anchor="nw" )
+
+                elif  state == state2: 
+                
+                    self.canvas.create_image(
+                                            635,
+                                            y + spacing*2.5 ,
+                                            image=self.image_unmarked,
+                                            anchor="nw" )
+                elif  state == state3:
+                
+                    self.canvas.create_window(
+                                            650,
+                                            y + spacing*2.5 ,
+                                            window= self.marcar_button,
+                                            width="50"),
+
+                elif  state == state4:
+                
+                    pass
+                           
                 y += height
 
         teacher_fullname: dict = self.makeRequest("GET",
