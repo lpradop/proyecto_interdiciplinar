@@ -28,7 +28,7 @@ spanish_days: dict = {
     'Wednesday': 'Miércoles',
     'Thursday': 'Jueves',
     'Friday': 'Viernes',
-    'Saturday': 'Jueves',
+    'Saturday': 'Sabado',
     'Sunday': 'Domingo'
 }
 

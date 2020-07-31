@@ -2,12 +2,10 @@
 # futuras peticiones, se requiere un nombre de usuario y contrasena validos
 [login]
 request={Usuario:str,Contrasena:str}
-response={success:bool, account_type: str}
-type = "GET"
+type = "POST"
 
 [teacher_course_list]
-response=[{CursoNombre:str,HoraInicio:str,HoraFin:str, Salon:str, Pabellon:str, Estado:str }]
-request = {}
+response=[{CursoNombre:str,HoraInicio:str,HoraFin:str, Salon:str, Pabellon:str, state:str }]
 type = "GET"
 
 [teacher_mark]
@@ -19,11 +17,3 @@ type = "POST"
 request={}
 response={success:bool}
 type = "POST"
-# curso pasado   check
-# curso pasado   x
-# curso pasado   x
-# curso ahora    |marcar|
-# curso futuro  
-# curso futuro 
-
-
