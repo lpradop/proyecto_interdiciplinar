@@ -286,9 +286,8 @@ class Client:
         # Indicador de dia
         self.canvas.create_rectangle(150, 200, 550, 250, fill="#ffffff", outline="")
         self.canvas.create_text(
-            170, 215, text="Fecha:", font="Verdana 15 bold", fill="black", anchor="nw",
+            170, 215, text="Fecha:", font="Verdana 15 bold", fill="black", anchor="nw"
         )
-
         self.canvas.create_text(
             250,
             215,
@@ -297,8 +296,8 @@ class Client:
             fill="black",
             anchor="nw",
         )
-
         createCourseList(self, course_list)
+
         while self.interface_state == "Docente":
             self.main_window.update_idletasks()
             self.main_window.update()
