@@ -63,13 +63,13 @@ def login() -> dict:
         # consulta en la tabla administrador
         query: str = "select Usuario,Contrasena from Administrador where Usuario=%s and Contrasena=%s"
         db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-        db_cursor.close()
 
         if db_cursor.rowcount > 0:
             session.permanent = True
             session["account_type"] = "Administrador"
             response: dict = db_cursor.fetchone()
             session["Usuario"] = response["Usuario"]
+            db_cursor.close()
             return make_response({"account_type": session["account_type"]}, 200)
         # no se encontro nada
         else:
