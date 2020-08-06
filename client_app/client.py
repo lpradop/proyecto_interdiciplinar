@@ -37,12 +37,13 @@ class Client:
 
         # posibles estados: Login, Docente, Administrador
         self.interface_state: str = "Login"
-
+        
         self.main_window = tk.Tk()
         self.main_window.geometry("800x800")
         self.main_window.title("S.C.A.D.")
         self.main_window.resizable(0, 0)
         self.main_window.protocol("WM_DELETE_WINDOW", self.logout)
+        
 
         self.canvas = tk.Canvas(self.main_window, height=800, width=800)
         self.canvas.place(x=0, y=0)
@@ -83,7 +84,10 @@ class Client:
         # se inicia el cliente
         self.run()
 
+
+
     def createLoginInterface(self) -> None:
+        self.main_window.protocol("WM_DELETE_WINDOW", self.salida)
         def login(self, username_entry: ttk.Entry, password_entry: ttk.Entry):
 
             data: dict = {"Usuario": str, "Contrasena": str}
@@ -307,8 +311,13 @@ class Client:
             self.canvas.update()
 
     def createAdminInterface(self) -> None:
-        # interfaz que vera el admin
-        pass
+        self.canvas.create_rectangle(350, 60, 740, 150, fill="#CAAAB3", outline="")
+        while self.interface_state == "Administrador":
+            self.main_window.update_idletasks()
+            self.main_window.update()
+            self.canvas.update()
+
+
 
     def makeRequest(
         self, method: str, service: str, json: dict = {}
@@ -326,10 +335,19 @@ class Client:
                 "error", "No ha sido posible realizar la conexion con el servidor",
             )
 
+    def salida(self) -> None:
+        self.interface_state = "Salida"
+
     def logout(self) -> None:
+        salida()
         self.makeRequest("DELETE", "logout")
         self.main_window.destroy()
+        
 
     def run(self) -> None:
         self.createLoginInterface()
-        self.createTeacherInterface()
+
+        if(self.interface_state == "Docente"):
+            self.createTeacherInterface()
+        elif (self.interface_state == "Administrador"):
+            self.createAdminInterface()
