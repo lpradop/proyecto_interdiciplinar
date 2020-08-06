@@ -49,17 +49,22 @@ class Client:
         # se definen las rutas de los recursos a utilizar
         background_path = path.dirname(path.abspath(__file__)) + "/res/background.png"
         teacher_marked_indicator_path = (
-            path.dirname(path.abspath(__file__)) + "/res/teacher/marked.png"
+            path.dirname(path.abspath(__file__)) + "/res/Checked.png"
         )
         teacher_not_marked_indicator_path = (
-            path.dirname(path.abspath(__file__)) + "/res/teacher/not_marked.png"
+            path.dirname(path.abspath(__file__)) + "/res/unChecked.png"
         )
-        teacher_mark_now_indicator_path = (
-            path.dirname(path.abspath(__file__)) + "/res/teacher/mark_now.png"
-        )
-        teacher_waiting_indicator_path = (
-            path.dirname(path.abspath(__file__)) + "/res/teacher/waiting.png"
-        )
+        #este es un boton
+        #teacher_mark_now_indicator_path = (
+        #    path.dirname(path.abspath(__file__)) + "/res/mark_now.png"
+        #)
+
+        # esto debe ir en blanco
+        # teacher_waiting_indicator_path = (
+        #    path.dirname(path.abspath(__file__)) + "/res/waiting.png"
+        #)
+
+
         # se cargan las imagenes a la ram
         self.image_teacher_marked_indicator = tk.PhotoImage(
             file=teacher_marked_indicator_path
@@ -67,12 +72,12 @@ class Client:
         self.image_teacher_not_marked_indicator = tk.PhotoImage(
             file=teacher_not_marked_indicator_path
         )
-        self.image_teacher_mark_now_indicator = tk.PhotoImage(
-            file=teacher_mark_now_indicator_path
-        )
-        self.image_teacher_waiting_indicator = tk.PhotoImage(
-            file=teacher_waiting_indicator_path
-        )
+        #self.image_teacher_mark_now_indicator = tk.PhotoImage(
+            #file=teacher_mark_now_indicator_path
+        #)
+        #self.image_teacher_waiting_indicator = tk.PhotoImage(
+            #file=teacher_waiting_indicator_path
+        #)
         self.image_background = tk.PhotoImage(file=background_path)
 
         # se dibuja la imagen de fondo que es comun a todas las interfaces
