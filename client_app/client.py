@@ -311,7 +311,69 @@ class Client:
             self.canvas.update()
 
     def createAdminInterface(self) -> None:
-        self.canvas.create_rectangle(350, 60, 740, 150, fill="#CAAAB3", outline="")
+        self.canvas.create_rectangle(450, 60, 740, 150, fill="#CAAAB3", outline="")
+        self.canvas.create_text(
+            535, 90, text="Administrador", font="Verdana 15 bold", fill="black", anchor="nw" )
+        self.canvas.create_rectangle(450, 60, 500, 150, fill="white", outline="")
+
+        self.canvas.create_text(
+            65, 180, text="Descarga de registros por fecha:", 
+            font="Verdana 23 bold", fill="white", anchor="nw" )
+
+        button_download_today = tk.Button(
+                    self.main_window,
+                    text="Hoy",
+                    fg="#63061F",
+                    background="white",
+                    font="Verdana 8 bold")
+        
+        button_download_yesterday = tk.Button(
+                    self.main_window,
+                    text="Ayer",
+                    fg="#63061F",
+                    background="white",
+                    font="Verdana 8 bold")
+        
+        button_download_this_week = tk.Button(
+                    self.main_window,
+                    text="Esta semana",
+                    fg="#63061F",
+                    background="white",
+                    font="Verdana 8 bold")
+
+        button_download_this_month = tk.Button(
+                    self.main_window,
+                    text="Este mes",
+                    fg="#63061F",
+                    background="white",
+                    font="Verdana 8 bold")
+
+        button_download_everything = tk.Button(
+                    self.main_window,
+                    text="Todo",
+                    fg="#63061F",
+                    background="white",
+                    font="Verdana 8 bold")
+        
+
+        self.canvas.create_window(
+                        100, 260, window=button_download_today, width="80" ),
+        self.canvas.create_window(
+                        300, 260, window=button_download_yesterday, width="80" ),
+        self.canvas.create_window(
+                        100, 300, window=button_download_this_week, width="80" ),
+        self.canvas.create_window(
+                        300, 300, window=button_download_this_month, width="80" ),
+        self.canvas.create_window(
+                        100, 340, window=button_download_everything, width="80" ),
+        
+
+        
+        self.canvas.create_text(
+            350, 600, text="Modificar Base de Datos:", 
+            font="Verdana 20 bold", fill="white", anchor="nw" )
+
+
         while self.interface_state == "Administrador":
             self.main_window.update_idletasks()
             self.main_window.update()
@@ -335,14 +397,14 @@ class Client:
                 "error", "No ha sido posible realizar la conexion con el servidor",
             )
 
-    def salida(self) -> None:
-        self.interface_state = "Salida"
-
+    
     def logout(self) -> None:
-        salida()
         self.makeRequest("DELETE", "logout")
         self.main_window.destroy()
         
+    def salida(self) -> None:
+        self.interface_state = "Salida"
+    
 
     def run(self) -> None:
         self.createLoginInterface()
