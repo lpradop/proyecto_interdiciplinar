@@ -8,20 +8,12 @@ from datetime import timedelta
 from datetime import datetime
 import json
 
-# select a.CursoNombre,a.HoraInicio,a.HoraFin,s.Pabellon,s.Numero from AsignacionCurso a inner join Salon s using(SalonID)
-# left join Marcacion using(SalonID) where a.DocenteDNI="77675913" and a.Dia="Jueves" order by a.HoraInicio asc;
-# cd Documents/code/UNSA/proyecto_interdiciplinar/server_app/
-# export FLASK_APP=main.py
-# python -m flask run
-# INSERT INTO AsignacionCurso(DocenteDNI,CursoNombre,SalonID,HoraInicio,HoraFin
-# ,Dia) values ('77675913','Estructuras Discretas 1',(select SalonID from Salon
-# where Numero='105' and Pab
-# ellon='Sistemas'),'14:00:00','16:00:00','Lunes');
+
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "clave ultra secreta"
 app.permanent_session_lifetime = timedelta(minutes=20)
 
-teacher_time_tolerance = timedelta(minutes=15)
+teacher_time_tolerance = timedelta(minutes=30)
 db = mysql.connect(
     host="localhost", user="brocolio", password="brocolio", database="scad"
 )
@@ -37,6 +29,7 @@ spanish_days: dict = {
     "Saturday": "sábado",
     "Sunday": "domingo",
 }
+time_lapse = "TODAY,YESTERDAY,THIS_WEEK,THIS_MONTH,ALL"
 
 json.JSONEncoder.default = lambda self, obj: (
     obj.isoformat() if isinstance(obj, datetime) else str(obj)
@@ -178,7 +171,7 @@ def teacherMark() -> dict:
             dictionary=True, buffered=True
         )
         query: str = (
-            "select AsignacionCursoID,SalonID"
+            "select AsignacionCursoID,SalonID "
             "from AsignacionCurso "
             "where DocenteDNI=%s "
             "and Dia=dayname(%s) "
@@ -191,20 +184,21 @@ def teacherMark() -> dict:
                 session["DocenteDNI"],
                 current_date.strftime("%Y/%m/%d"),
                 current_date.strftime("%H:%M:%S"),
+                current_date.strftime("%H:%M:%S"),
                 str(teacher_time_tolerance),
             ),
         )
-        if db.cursor.rowcount > 0:
+        if db_cursor.rowcount > 0:
             course_to_mark = db_cursor.fetchone()
-            insertion_query: str = ("insert into Marcacion() " "values(%s,%s,%s,%s)")
+            insertion_query: str = ("insert into Marcacion() " "values(%s,%s,%s,%s);")
 
             db_cursor.execute(
                 insertion_query,
                 (
-                    course_to_mark["AsignacionCursoID"],
+                    int(course_to_mark["AsignacionCursoID"]),
                     current_date.strftime("%Y/%m/%d"),
                     current_date.strftime("%H:%M:%S"),
-                    course_to_mark["SalonID"],
+                    int(course_to_mark["SalonID"]),
                 ),
             )
             db_cursor.close()
@@ -219,8 +213,18 @@ def teacherMark() -> dict:
         )
 
 
+@app.route("/admin_get_register", methods=["GET"])
+def adminGetRegister() -> list:
+    data: dict = request.get_json()
+    if data["time_lapse"] in time_lapse:
+        pass
+    else:
+        return make_response("no shabo", 400)
+
+
 @app.route("/logout", methods=["DELETE"])
 def logout() -> dict:
+    db.disconnect()
     if "account_type" not in session:
         return make_response("primero inicia session broz", 301)
     else:
