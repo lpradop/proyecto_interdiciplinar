@@ -211,7 +211,7 @@ def teacherMark() -> dict:
             return make_response("se marco la asistencia", 200)
         else:
             db_cursor.close()
-            return make_response("ya es tarde", 400)
+            return make_response("ya es tarde", 406)
 
     elif session["account_type"] == "Administrador":
         return make_response(
