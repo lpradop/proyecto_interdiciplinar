@@ -81,7 +81,6 @@ class Client:
         # se dibuja la imagen de fondo que es comun a todas las interfaces
         self.canvas.create_image(0, 0, image=self.image_background, anchor="nw")
         # se inicia el cliente
-        self.run()
 
     def createLoginInterface(self) -> None:
         def login(self, username_entry: ttk.Entry, password_entry: ttk.Entry):
@@ -238,12 +237,18 @@ class Client:
 
                 if course["state"] == "marked":
                     self.canvas.create_image(
-                        635, y + spacing * 2.5, image=self.image_teacher_marked_indicator, anchor="nw"
+                        635,
+                        y + spacing * 2.5,
+                        image=self.image_teacher_marked_indicator,
+                        anchor="nw",
                     )
 
                 elif course["state"] == "not_marked":
                     self.canvas.create_image(
-                        635, y + spacing * 2.5, image=self.image_teacher_not_marked_indicator, anchor="nw"
+                        635,
+                        y + spacing * 2.5,
+                        image=self.image_teacher_not_marked_indicator,
+                        anchor="nw",
                     )
 
                 elif course["state"] == "mark_now":

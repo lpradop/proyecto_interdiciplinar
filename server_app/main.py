@@ -3,7 +3,7 @@ from flask import request
 from flask import session
 from flask import jsonify
 from flask import make_response
-import mysql.connector as sql
+import mysql.connector as mysql
 from datetime import timedelta
 from datetime import datetime
 import json
@@ -22,7 +22,7 @@ app.config["SECRET_KEY"] = "clave ultra secreta"
 app.permanent_session_lifetime = timedelta(minutes=20)
 
 teacher_time_tolerance = timedelta(minutes=15)
-db = sql.connect(
+db = mysql.connect(
     host="localhost", user="brocolio", password="brocolio", database="scad"
 )
 spanish_days: dict = {
@@ -42,12 +42,18 @@ json.JSONEncoder.default = lambda self, obj: (
 
 @app.route("/login", methods=["POST"])
 def login() -> dict:
-    db_cursor = db.cursor(dictionary=True, buffered=True)
-    data = request.get_json()
+    db_cursor: mysql.cursor.MySQLCursorBufferedDict = db.cursor(
+        dictionary=True, buffered=True
+    )
+    data: dict = request.get_json()
 
     # consulta a la base de datos si el usuario y contrasena son validos
     # consulta en la tabla docente
-    query: str = "select DocenteDNI,Nombre,Apellido,Usuario from Docente where Usuario=%s and Contrasena=%s;"
+    query: str = (
+        "select DocenteDNI, Nombre, Apellido, Usuario "
+        "from Docente "
+        "where Usuario=%s and Contrasena=%s;"
+    )
     db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
 
     if db_cursor.rowcount > 0:
@@ -115,7 +121,9 @@ def teacherCourseList() -> list:
             "left join Marcacion m using(AsignacionCursoID) "
             "where a.DocenteDNI=%s and a.Dia=dayname(%s) order by a.HoraInicio asc;"
         )
-        db_cursor = db.cursor(dictionary=True, buffered=True)
+        db_cursor: mysql.cursor.MySQLCursorBufferedDict = db.cursor(
+            dictionary=True, buffered=True
+        )
         db_cursor.execute(
             query, (session["DocenteDNI"], datetime.now().strftime("%Y/%m/%d"))
         )
@@ -155,8 +163,6 @@ def teacherCourseList() -> list:
 
 @app.route("/teacher_mark", methods=["POST"])
 def teacherMark() -> dict:
-
-    data: dict = request.json
     # validar si es posible marcar el registro del curso
     if True:
         return {"success": True}
