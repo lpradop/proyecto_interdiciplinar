@@ -37,13 +37,12 @@ class Client:
 
         # posibles estados: Login, Docente, Administrador
         self.interface_state: str = "Login"
-        
+
         self.main_window = tk.Tk()
         self.main_window.geometry("800x800")
         self.main_window.title("S.C.A.D.")
         self.main_window.resizable(0, 0)
-        self.main_window.protocol("WM_DELETE_WINDOW", self.logout)
-        
+        self.main_window.protocol("WM_DELETE_WINDOW", self.quit)
 
         self.canvas = tk.Canvas(self.main_window, height=800, width=800)
         self.canvas.place(x=0, y=0)
@@ -71,12 +70,12 @@ class Client:
         self.image_teacher_not_marked_indicator = tk.PhotoImage(
             file=teacher_not_marked_indicator_path
         )
-        # self.image_teacher_mark_now_indicator = tk.PhotoImage(
-        # file=teacher_mark_now_indicator_path
-        # )
-        # self.image_teacher_waiting_indicator = tk.PhotoImage(
-        # file=teacher_waiting_indicator_path
-        # )
+        self.image_teacher_mark_now_indicator = tk.PhotoImage(
+            file=teacher_mark_now_indicator_path
+        )
+        self.image_teacher_waiting_indicator = tk.PhotoImage(
+            file=teacher_waiting_indicator_path
+        )
         self.image_background = tk.PhotoImage(file=background_path)
 
         # se dibuja la imagen de fondo que es comun a todas las interfaces
@@ -84,10 +83,7 @@ class Client:
         # se inicia el cliente
         self.run()
 
-
-
     def createLoginInterface(self) -> None:
-        self.main_window.protocol("WM_DELETE_WINDOW", self.salida)
         def login(self, username_entry: ttk.Entry, password_entry: ttk.Entry):
 
             data: dict = {"Usuario": str, "Contrasena": str}
@@ -165,7 +161,7 @@ class Client:
         # primero obtenemos los datos
 
         def createCourseList(self, course_list: list) -> None:
-            button_mark = tk.Button(
+            button_mark_now = tk.Button(
                 self.main_window,
                 text="Marcar",
                 fg="#63061F",
@@ -234,38 +230,28 @@ class Client:
                     anchor="nw",
                 )
 
-                # fila Marcación
-
-                state1 = "marcado"
-                state2 = "nomarcado"
-                state3 = "pomarcar"
-                state4 = "esperando"
+                # columna de estado del marcado
 
                 self.canvas.create_rectangle(
                     615, y + spacing, 710, y + height, fill="#CAAAB3", outline="",
                 )
 
-                state = state3
-
-                if state == state1:
-
+                if course["state"] == "marked":
                     self.canvas.create_image(
-                        635, y + spacing * 2.5, image=self.image_marked, anchor="nw"
+                        635, y + spacing * 2.5, image=self.image_teacher_marked_indicator, anchor="nw"
                     )
 
-                elif state == state2:
-
+                elif course["state"] == "not_marked":
                     self.canvas.create_image(
-                        635, y + spacing * 2.5, image=self.image_unmarked, anchor="nw"
+                        635, y + spacing * 2.5, image=self.image_teacher_not_marked_indicator, anchor="nw"
                     )
-                elif state == state3:
 
+                elif course["state"] == "mark_now":
                     self.canvas.create_window(
-                        650, y + spacing * 2.5, window=button_mark, width="50"
+                        650, y + spacing * 2.5, window=button_mark_now, width="50"
                     ),
 
-                elif state == state4:
-
+                elif course["state"] == "waiting":
                     pass
 
                 y += height
@@ -313,73 +299,91 @@ class Client:
     def createAdminInterface(self) -> None:
         self.canvas.create_rectangle(450, 60, 740, 150, fill="#CAAAB3", outline="")
         self.canvas.create_text(
-            535, 90, text="Administrador", font="Verdana 15 bold", fill="black", anchor="nw" )
+            535,
+            90,
+            text="Administrador",
+            font="Verdana 15 bold",
+            fill="black",
+            anchor="nw",
+        )
         self.canvas.create_rectangle(450, 60, 500, 150, fill="white", outline="")
 
         self.canvas.create_text(
-            65, 180, text="Descarga de registros por fecha:", 
-            font="Verdana 23 bold", fill="white", anchor="nw" )
+            65,
+            180,
+            text="Descarga de registros por fecha:",
+            font="Verdana 23 bold",
+            fill="white",
+            anchor="nw",
+        )
 
         button_download_today = tk.Button(
-                    self.main_window,
-                    text="Hoy",
-                    fg="#63061F",
-                    background="white",
-                    font="Verdana 8 bold")
-        
+            self.main_window,
+            text="Hoy",
+            fg="#63061F",
+            background="white",
+            font="Verdana 8 bold",
+        )
+
         button_download_yesterday = tk.Button(
-                    self.main_window,
-                    text="Ayer",
-                    fg="#63061F",
-                    background="white",
-                    font="Verdana 8 bold")
-        
+            self.main_window,
+            text="Ayer",
+            fg="#63061F",
+            background="white",
+            font="Verdana 8 bold",
+        )
+
         button_download_this_week = tk.Button(
-                    self.main_window,
-                    text="Esta semana",
-                    fg="#63061F",
-                    background="white",
-                    font="Verdana 8 bold")
+            self.main_window,
+            text="Esta semana",
+            fg="#63061F",
+            background="white",
+            font="Verdana 8 bold",
+        )
 
         button_download_this_month = tk.Button(
-                    self.main_window,
-                    text="Este mes",
-                    fg="#63061F",
-                    background="white",
-                    font="Verdana 8 bold")
+            self.main_window,
+            text="Este mes",
+            fg="#63061F",
+            background="white",
+            font="Verdana 8 bold",
+        )
 
         button_download_everything = tk.Button(
-                    self.main_window,
-                    text="Todo",
-                    fg="#63061F",
-                    background="white",
-                    font="Verdana 8 bold")
-        
+            self.main_window,
+            text="Todo",
+            fg="#63061F",
+            background="white",
+            font="Verdana 8 bold",
+        )
 
+        self.canvas.create_window(100, 260, window=button_download_today, width="80"),
         self.canvas.create_window(
-                        100, 260, window=button_download_today, width="80" ),
+            300, 260, window=button_download_yesterday, width="80"
+        ),
         self.canvas.create_window(
-                        300, 260, window=button_download_yesterday, width="80" ),
+            100, 300, window=button_download_this_week, width="80"
+        ),
         self.canvas.create_window(
-                        100, 300, window=button_download_this_week, width="80" ),
+            300, 300, window=button_download_this_month, width="80"
+        ),
         self.canvas.create_window(
-                        300, 300, window=button_download_this_month, width="80" ),
-        self.canvas.create_window(
-                        100, 340, window=button_download_everything, width="80" ),
-        
+            100, 340, window=button_download_everything, width="80"
+        ),
 
-        
         self.canvas.create_text(
-            350, 600, text="Modificar Base de Datos:", 
-            font="Verdana 20 bold", fill="white", anchor="nw" )
-
+            350,
+            600,
+            text="Modificar Base de Datos:",
+            font="Verdana 20 bold",
+            fill="white",
+            anchor="nw",
+        )
 
         while self.interface_state == "Administrador":
             self.main_window.update_idletasks()
             self.main_window.update()
             self.canvas.update()
-
-
 
     def makeRequest(
         self, method: str, service: str, json: dict = {}
@@ -397,19 +401,15 @@ class Client:
                 "error", "No ha sido posible realizar la conexion con el servidor",
             )
 
-    
-    def logout(self) -> None:
-        self.makeRequest("DELETE", "logout")
+    def quit(self) -> None:
+        if self.interface_state != "Login":
+            self.makeRequest("DELETE", "logout")
         self.main_window.destroy()
-        
-    def salida(self) -> None:
-        self.interface_state = "Salida"
-    
 
     def run(self) -> None:
         self.createLoginInterface()
 
-        if(self.interface_state == "Docente"):
+        if self.interface_state == "Docente":
             self.createTeacherInterface()
-        elif (self.interface_state == "Administrador"):
+        elif self.interface_state == "Administrador":
             self.createAdminInterface()

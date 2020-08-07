@@ -140,7 +140,7 @@ def teacherCourseList() -> list:
                             current_time - course["HoraInicio"]
                             <= teacher_time_tolerance
                         ):
-                            course["state"] = "to_mark"
+                            course["state"] = "mark_now"
                         else:
                             course["state"] = "not_marked"
                     else:
