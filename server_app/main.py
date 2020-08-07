@@ -25,6 +25,9 @@ teacher_time_tolerance = timedelta(minutes=15)
 db = mysql.connect(
     host="localhost", user="brocolio", password="brocolio", database="scad"
 )
+tmp_cursor: mysql.cursor.MySQLCursor = db.cursor()
+tmp_cursor.execute("SET lc_time_names = 'es_PE';")
+tmp_cursor.close()
 spanish_days: dict = {
     "Monday": "lunes",
     "Tuesday": "martes",
@@ -164,10 +167,56 @@ def teacherCourseList() -> list:
 @app.route("/teacher_mark", methods=["POST"])
 def teacherMark() -> dict:
     # validar si es posible marcar el registro del curso
-    if True:
-        return {"success": True}
-    else:
-        return {"success": False}
+    if "account_type" not in session:
+        # no inicio sesion
+        return make_response("stap", 401)
+    elif session["account_type"] == "Docente":
+        current_date = datetime.now()
+        course_to_mark: dict
+
+        db_cursor: mysql.cursor.MySQLCursorBufferedDict = db.cursor(
+            dictionary=True, buffered=True
+        )
+        query: str = (
+            "select AsignacionCursoID,SalonID"
+            "from AsignacionCurso "
+            "where DocenteDNI=%s "
+            "and Dia=dayname(%s) "
+            "and HoraInicio <=%s "
+            "and timediff(%s,HoraInicio)<=%s;"
+        )
+        db_cursor.execute(
+            query,
+            (
+                session["DocenteDNI"],
+                current_date.strftime("%Y/%m/%d"),
+                current_date.strftime("%H:%M:%S"),
+                str(teacher_time_tolerance),
+            ),
+        )
+        if db.cursor.rowcount > 0:
+            course_to_mark = db_cursor.fetchone()
+            insertion_query: str = ("insert into Marcacion() " "values(%s,%s,%s,%s)")
+
+            db_cursor.execute(
+                insertion_query,
+                (
+                    course_to_mark["AsignacionCursoID"],
+                    current_date.strftime("%Y/%m/%d"),
+                    current_date.strftime("%H:%M:%S"),
+                    course_to_mark["SalonID"],
+                ),
+            )
+            db_cursor.close()
+            return make_response("se marco la asistencia", 200)
+        else:
+            db_cursor.close()
+            return make_response("ya es tarde", 400)
+
+    elif session["account_type"] == "Administrador":
+        return make_response(
+            "papu, si ya nos jakiaste por lo menos usa los servicios correctos no?", 400
+        )
 
 
 @app.route("/logout", methods=["DELETE"])
