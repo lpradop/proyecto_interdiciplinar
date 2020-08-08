@@ -3,23 +3,28 @@ from flask import request
 from flask import session
 from flask import jsonify
 from flask import make_response
-import mysql.connector as mysql
-from datetime import timedelta
-from datetime import datetime
+import mariadb
+import datetime
 import json
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "clave ultra secreta"
-app.permanent_session_lifetime = timedelta(minutes=20)
+app.permanent_session_lifetime = datetime.timedelta(minutes=20)
 
-teacher_time_tolerance = timedelta(minutes=30)
-db = mysql.connect(
-    host="localhost", user="brocolio", password="brocolio", database="scad"
+teacher_time_tolerance = datetime.timedelta(minutes=30)
+db = mariadb.ConnectionPool(
+    user="brocolio",
+    password="brocolio",
+    host="localhost",
+    pool_name="pul",
+    pool_size=20,
+    database="scad",
 )
-tmp_cursor: mysql.cursor.MySQLCursor = db.cursor()
-tmp_cursor.execute("SET lc_time_names = 'es_PE';")
-tmp_cursor.close()
+
+# tmp_cursor: mysql.cursor.MySQLCursor = db.cursor()
+# tmp_cursor.execute("SET lc_time_names = 'es_PE';")
+# tmp_cursor.close()
 spanish_days: dict = {
     "Monday": "lunes",
     "Tuesday": "martes",
@@ -29,18 +34,22 @@ spanish_days: dict = {
     "Saturday": "sábado",
     "Sunday": "domingo",
 }
-time_lapse = "TODAY,YESTERDAY,THIS_WEEK,THIS_MONTH,ALL"
+time_lapse = ("TODAY", "YESTERDAY", "THIS_WEEK", "THIS_MONTH", "ALL")
 
 json.JSONEncoder.default = lambda self, obj: (
-    obj.isoformat() if isinstance(obj, datetime) else str(obj)
+    obj.isoformat() if isinstance(obj, datetime.datetime) else str(obj)
 )
+
+
+def rowToDict(columns: tuple, rows: list) -> list:
+    return [dict(zip(columns, row)) for row in rows]
 
 
 @app.route("/login", methods=["POST"])
 def login() -> dict:
-    db_cursor: mysql.cursor.MySQLCursorBufferedDict = db.cursor(
-        dictionary=True, buffered=True
-    )
+
+    db_connection = db.get_connection()
+    db_cursor = db_connection.cursor(named_tuple=True)
     data: dict = request.get_json()
 
     # consulta a la base de datos si el usuario y contrasena son validos
@@ -48,36 +57,43 @@ def login() -> dict:
     query: str = (
         "select DocenteDNI, Nombre, Apellido, Usuario "
         "from Docente "
-        "where Usuario=%s and Contrasena=%s;"
+        "where Usuario=? and Contrasena=?"
     )
     db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
-
-    if db_cursor.rowcount > 0:
-        response: dict = db_cursor.fetchone()
+    rows = db_cursor.fetchall()
+    if len(rows) == 1:
         session.permanent = True
         session["account_type"] = "Docente"
-        session["DocenteDNI"] = response["DocenteDNI"]
-        session["Nombre"] = response["Nombre"]
-        session["Apellido"] = response["Apellido"]
-        session["Usuario"] = response["Usuario"]
+        session["DocenteDNI"] = rows[0].DocenteDNI
+        session["Nombre"] = rows[0].Nombre
+        session["Apellido"] = rows[0].Apellido
+        session["Usuario"] = rows[0].Usuario
 
         db_cursor.close()
+        db_connection.close()
         return make_response({"account_type": session["account_type"]}, 200)
 
     else:
         # consulta en la tabla administrador
-        query: str = "select Usuario,Contrasena from Administrador where Usuario=%s and Contrasena=%s"
+        query: str = (
+            "select Usuario,Contrasena "
+            "from Administrador "
+            "where Usuario=? and Contrasena=?"
+        )
         db_cursor.execute(query, (data["Usuario"], data["Contrasena"]))
+        rows = db_cursor.fetchall()
 
-        if db_cursor.rowcount > 0:
+        if len(rows) == 1:
             session.permanent = True
             session["account_type"] = "Administrador"
-            response: dict = db_cursor.fetchone()
-            session["Usuario"] = response["Usuario"]
+            session["Usuario"] = rows[0].Usuario
             db_cursor.close()
+            db_connection.close()
             return make_response({"account_type": session["account_type"]}, 200)
         # no se encontro nada
         else:
+            db_cursor.close()
+            db_connection.close()
             return make_response("pos a lo mejor se equivoco?", 401)
 
 
@@ -93,7 +109,7 @@ def teacherFullname() -> dict:
 
 @app.route("/time", methods=["GET"])
 def time() -> dict:
-    current_time = datetime.now()
+    current_time = datetime.datetime.now()
     return {
         "date": current_time.strftime("%d/%m/%Y"),
         "time": current_time.strftime("%H,%M,%S"),
@@ -110,30 +126,32 @@ def teacherCourseList() -> list:
         # consultar la lista de cursos y si se han marcado o no
         # un curso marcado se diferencia porque el valor de Hora de la tabla Marcacion
         # es diferente de NULL
+        db_connection = db.get_connection()
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SET lc_time_names = 'es_PE'")
         query: str = (
             "select a.CursoNombre, a.HoraInicio, a.HoraFin, s.Pabellon, s.Numero, m.Hora "
             "from AsignacionCurso a "
             "inner join Salon s using(SalonID) "
             "left join Marcacion m using(AsignacionCursoID) "
-            "where a.DocenteDNI=%s and a.Dia=dayname(%s) order by a.HoraInicio asc;"
-        )
-        db_cursor: mysql.cursor.MySQLCursorBufferedDict = db.cursor(
-            dictionary=True, buffered=True
+            "where a.DocenteDNI=? and a.Dia=dayname(?) order by a.HoraInicio asc;"
         )
         db_cursor.execute(
             query, (session["DocenteDNI"], datetime.now().strftime("%Y/%m/%d"))
         )
+
         # se almacenan las entradas en course_list
         course_list: list = db_cursor.fetchall()
         db_cursor.close()
+        db_connection.close()
 
         # se formatea course_list
-        current_date = datetime.now()
-        current_time = timedelta(
-            hours=current_date.hour,
-            minutes=current_date.minute,
-            seconds=current_date.second,
+        course_list = rowToDict(
+            ("CursoNombre", "HoraInicio", "HoraFin", "Pabellon", "Numero", "Hora"),
+            course_list,
         )
+        current_date = datetime.datetime.now()
+        current_time = datetime.time.fromisoformat(current_date.strftime("%H:%M:%S"))
         if len(course_list) > 0:
             for course in course_list:
                 if course["Hora"] is not None:
@@ -164,19 +182,17 @@ def teacherMark() -> dict:
         # no inicio sesion
         return make_response("stap", 401)
     elif session["account_type"] == "Docente":
-        current_date = datetime.now()
+        current_date = datetime.datetime.now()
         course_to_mark: dict
-
-        db_cursor: mysql.cursor.MySQLCursorBufferedDict = db.cursor(
-            dictionary=True, buffered=True
-        )
+        db_connection = db.get_connection()
+        db_cursor = db_connection.cursor(named_tuple=True)
         query: str = (
             "select AsignacionCursoID,SalonID "
             "from AsignacionCurso "
-            "where DocenteDNI=%s "
-            "and Dia=dayname(%s) "
-            "and HoraInicio <=%s "
-            "and timediff(%s,HoraInicio)<=%s;"
+            "where DocenteDNI=? "
+            "and Dia=dayname(?) "
+            "and HoraInicio <=? "
+            "and timediff(?,HoraInicio)<=?;"
         )
         db_cursor.execute(
             query,
@@ -188,23 +204,26 @@ def teacherMark() -> dict:
                 str(teacher_time_tolerance),
             ),
         )
-        if db_cursor.rowcount > 0:
-            course_to_mark = db_cursor.fetchone()
-            insertion_query: str = ("insert into Marcacion() " "values(%s,%s,%s,%s);")
+        course_to_mark = db_cursor.fetchall()
+        if len(course_to_mark) == 1:
+
+            insertion_query: str = ("insert into Marcacion() " "values(?,?,?,?);")
 
             db_cursor.execute(
                 insertion_query,
                 (
-                    int(course_to_mark["AsignacionCursoID"]),
+                    int(course_to_mark.AsignacionCursoID),
                     current_date.strftime("%Y/%m/%d"),
                     current_date.strftime("%H:%M:%S"),
-                    int(course_to_mark["SalonID"]),
+                    int(course_to_mark.SalonID),
                 ),
             )
             db_cursor.close()
+            db_connection.close()
             return make_response("se marco la asistencia", 200)
         else:
             db_cursor.close()
+            db_connection.close()
             return make_response("ya es tarde", 406)
 
     elif session["account_type"] == "Administrador":
@@ -217,14 +236,14 @@ def teacherMark() -> dict:
 def adminGetRegister() -> list:
     data: dict = request.get_json()
     if data["time_lapse"] in time_lapse:
-        pass
+        queryy: str = ("select * ")
+
     else:
         return make_response("no shabo", 400)
 
 
 @app.route("/logout", methods=["DELETE"])
 def logout() -> dict:
-    db.disconnect()
     if "account_type" not in session:
         return make_response("primero inicia session broz", 301)
     else:
