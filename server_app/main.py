@@ -6,13 +6,18 @@ from flask import make_response
 import mariadb
 import datetime
 import json
+import scad_utils
+
+testing: bool = True
+if testing:
+    fake_datetime = datetime.datetime(2020, 8, 7, 10, 10)
 
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "clave ultra secreta"
 app.permanent_session_lifetime = datetime.timedelta(minutes=20)
 
-teacher_time_tolerance = datetime.timedelta(minutes=30)
+teacher_time_tolerance = datetime.timedelta(minutes=20)
 db = mariadb.ConnectionPool(
     user="brocolio",
     password="brocolio",
@@ -39,10 +44,6 @@ time_lapse = ("TODAY", "YESTERDAY", "THIS_WEEK", "THIS_MONTH", "ALL")
 json.JSONEncoder.default = lambda self, obj: (
     obj.isoformat() if isinstance(obj, datetime.datetime) else str(obj)
 )
-
-
-def rowToDict(columns: tuple, rows: list) -> list:
-    return [dict(zip(columns, row)) for row in rows]
 
 
 @app.route("/login", methods=["POST"])
@@ -109,10 +110,13 @@ def teacherFullname() -> dict:
 
 @app.route("/time", methods=["GET"])
 def time() -> dict:
-    current_time = datetime.datetime.now()
+    if testing:
+        current_datetime = fake_datetime
+    else:
+        current_datetime = datetime.datetime.now()
     return {
-        "date": current_time.strftime("%d/%m/%Y"),
-        "time": current_time.strftime("%H,%M,%S"),
+        "date": current_datetime.strftime("%d/%m/%Y"),
+        "time": current_datetime.strftime("%H,%M,%S"),
     }
 
 
@@ -126,6 +130,11 @@ def teacherCourseList() -> list:
         # consultar la lista de cursos y si se han marcado o no
         # un curso marcado se diferencia porque el valor de Hora de la tabla Marcacion
         # es diferente de NULL
+        if testing:
+            current_datetime = fake_datetime
+        else:
+            current_datetime = datetime.datetime.now()
+
         db_connection = db.get_connection()
         db_cursor = db_connection.cursor()
         db_cursor.execute("SET lc_time_names = 'es_PE'")
@@ -137,7 +146,7 @@ def teacherCourseList() -> list:
             "where a.DocenteDNI=? and a.Dia=dayname(?) order by a.HoraInicio asc;"
         )
         db_cursor.execute(
-            query, (session["DocenteDNI"], datetime.now().strftime("%Y/%m/%d"))
+            query, (session["DocenteDNI"], current_datetime.strftime("%Y/%m/%d"))
         )
 
         # se almacenan las entradas en course_list
@@ -146,20 +155,24 @@ def teacherCourseList() -> list:
         db_connection.close()
 
         # se formatea course_list
-        course_list = rowToDict(
+        course_list = scad_utils.rowToDict(
             ("CursoNombre", "HoraInicio", "HoraFin", "Pabellon", "Numero", "Hora"),
             course_list,
         )
-        current_date = datetime.datetime.now()
-        current_time = datetime.time.fromisoformat(current_date.strftime("%H:%M:%S"))
+
         if len(course_list) > 0:
             for course in course_list:
                 if course["Hora"] is not None:
                     course["state"] = "marked"
                 else:
-                    if current_time >= course["HoraInicio"]:
+                    if current_datetime >= scad_utils.timeToDatetime(
+                        course["HoraInicio"], current_datetime
+                    ):
                         if (
-                            current_time - course["HoraInicio"]
+                            current_datetime
+                            - scad_utils.timeToDatetime(
+                                course["HoraInicio"], current_datetime
+                            )
                             <= teacher_time_tolerance
                         ):
                             course["state"] = "mark_now"
@@ -182,10 +195,15 @@ def teacherMark() -> dict:
         # no inicio sesion
         return make_response("stap", 401)
     elif session["account_type"] == "Docente":
-        current_date = datetime.datetime.now()
+        if testing:
+            current_datetime = fake_datetime
+        else:
+            current_datetime = datetime.datetime.now()
+        # consultar si hay algun curso para marcar
         course_to_mark: dict
         db_connection = db.get_connection()
         db_cursor = db_connection.cursor(named_tuple=True)
+        db_cursor.execute("SET lc_time_names = 'es_PE'")
         query: str = (
             "select AsignacionCursoID,SalonID "
             "from AsignacionCurso "
@@ -198,24 +216,23 @@ def teacherMark() -> dict:
             query,
             (
                 session["DocenteDNI"],
-                current_date.strftime("%Y/%m/%d"),
-                current_date.strftime("%H:%M:%S"),
-                current_date.strftime("%H:%M:%S"),
+                current_datetime.strftime("%Y/%m/%d"),
+                current_datetime.strftime("%H:%M:%S"),
+                current_datetime.strftime("%H:%M:%S"),
                 str(teacher_time_tolerance),
             ),
         )
         course_to_mark = db_cursor.fetchall()
         if len(course_to_mark) == 1:
-
             insertion_query: str = ("insert into Marcacion() " "values(?,?,?,?);")
 
             db_cursor.execute(
                 insertion_query,
                 (
-                    int(course_to_mark.AsignacionCursoID),
-                    current_date.strftime("%Y/%m/%d"),
-                    current_date.strftime("%H:%M:%S"),
-                    int(course_to_mark.SalonID),
+                    int(course_to_mark[0].AsignacionCursoID),
+                    current_datetime.strftime("%Y/%m/%d"),
+                    current_datetime.strftime("%H:%M:%S"),
+                    int(course_to_mark[0].SalonID),
                 ),
             )
             db_cursor.close()
