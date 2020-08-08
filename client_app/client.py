@@ -47,9 +47,9 @@ class Client:
         self.server_url = server_url
         self.session = requests.Session()
 
-        # posibles estados: 
+        # posibles estados:
         # Login, Docente, Administrador
-        # 
+        #
         self.interface_state: str = "Login"
 
         self.main_window = tk.Tk()
@@ -80,7 +80,7 @@ class Client:
         self.image_teacher_not_marked_indicator = tk.PhotoImage(
             file=teacher_not_marked_indicator_path
         ).subsample(7, 7)
-        
+
         self.image_teacher_waiting_indicator = tk.PhotoImage(
             file=teacher_waiting_indicator_path
         ).subsample(7, 7)
@@ -89,7 +89,6 @@ class Client:
         # se dibuja la imagen de fondo que es comun a todas las interfaces
         self.canvas.create_image(0, 0, image=self.image_background, anchor="nw")
         # se inicia el cliente
-
 
     def makeRequest(
         self, method: str, service: str, json: dict = {}
@@ -107,18 +106,14 @@ class Client:
                 "error", "No ha sido posible realizar la conexion con el servidor",
             )
 
-    
-
     def quit(self) -> None:
         if self.interface_state != "Login":
             self.makeRequest("DELETE", "logout")
-        
+
         self.main_window.destroy()
 
     def run(self) -> None:
         createLoginInterface(self)
-
-
 
         while self.interface_state != "Salir":
             if self.interface_state == "Docente":
@@ -130,11 +125,11 @@ class Client:
             elif self.interface_state == "Modificar Docentes":
                 createModifyTeacherInterface(self)
             elif self.interface_state == "Agregar Docente":
-                        createAddTeacherInterface(self)
+                createAddTeacherInterface(self)
             elif self.interface_state == "Modificar Cursos":
                 createModifySubjectInterface(self)
             elif self.interface_state == "Agregar Curso":
-                        createAddSubjectInterface(self)
+                createAddSubjectInterface(self)
             elif self.interface_state == "Modificar Salones":
                 createModifyClassroomInterface(self)
             elif self.interface_state == "Modificar Asignaciones de Curso":
@@ -142,9 +137,4 @@ class Client:
             elif self.interface_state == "Agregar Salón":
                 createAddClassroomInterface(self)
 
-
         print(self.interface_state)
-
-                    
-
-
