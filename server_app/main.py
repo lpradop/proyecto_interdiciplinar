@@ -10,7 +10,7 @@ import scad_utils
 
 testing: bool = True
 if testing:
-    fake_datetime = datetime.datetime(2020, 8, 6, 10, 10)
+    fake_datetime = datetime.datetime(2020, 8, 7, 15, 10)
 
 
 app = Flask(__name__)
@@ -263,14 +263,133 @@ def teacherMark() -> dict:
         )
 
 
-@app.route("/admin_get_register", methods=["GET"])
-def adminGetRegister() -> list:
-    data: dict = request.get_json()
-    if data["time_lapse"] == "today":
-        queryy: str = ("insert into Docente() values()")
+@app.route("/admin_get_report", methods=["GET"])
+def adminGetReport() -> list:
+    if "account_type" not in session:
+        # no inicio sesion
+        return make_response("nope", 401)
+    elif session["account_type"] == "Administrador":
+        time_range = request.get_json()["time_range"]
+        if testing:
+            current_datetime = fake_datetime
+        else:
+            current_datetime = datetime.datetime.now()
 
-    else:
-        return make_response("no shabo", 400)
+        db_connection = db.get_connection()
+        db_cursor = db_connection.cursor(named_tuple=True)
+        db_cursor.execute("SET lc_time_names = 'es_PE'")
+        report: list
+        if time_range == "today":
+            query: str = (
+                "select a.AsignacionCursoID,d.DocenteDNI,d.Nombre,d.Apellido, "
+                "a.CursoNombre, a.HoraInicio, a.HoraFin, s.Pabellon, s.Numero "
+                "from AsignacionCurso a "
+                "inner join Salon s using(SalonID) "
+                "inner join Docente d using(DocenteDNI) "
+                "where Dia=dayname(?) and a.HoraInicio<? "
+            )
+            db_cursor.execute(
+                query,
+                (
+                    current_datetime.strftime("%Y-%m-%d"),
+                    current_datetime.strftime("%H:%M:%S"),
+                ),
+            )
+            report = db_cursor.fetchall()
+            # se formatea la lista de cursos
+            report = scad_utils.rowToDict(
+                (
+                    "AsignacionCursoID",
+                    "DocenteDNI",
+                    "Nombre",
+                    "Apellido",
+                    "CursoNombre",
+                    "HoraInicio",
+                    "HoraFin",
+                    "Pabellon",
+                    "Numero",
+                ),
+                report,
+            )
+            if len(report) > 0:
+                existence_check_query: str = (
+                    "select * from Marcacion " "where Fecha=? and AsignacionCursoID=?"
+                )
+                for assignment in report:
+                    db_cursor.execute(
+                        existence_check_query,
+                        (
+                            current_datetime.strftime("%Y-%m-%d"),
+                            assignment["AsignacionCursoID"],
+                        ),
+                    )
+                    if len(db_cursor.fetchall()) > 0:
+                        assignment["state"] = "marked"
+                    else:
+                        assignment["state"] = "not_marked"
+
+            db_cursor.close()
+            db_connection.close()
+            return make_response(jsonify(report), 200)
+        elif time_range == "yesterday":
+            query: str = (
+                "select a.AsignacionCursoID,d.DocenteDNI,d.Nombre,d.Apellido, "
+                "a.CursoNombre, a.HoraInicio, a.HoraFin, s.Pabellon, s.Numero "
+                "from AsignacionCurso a "
+                "inner join Salon s using(SalonID) "
+                "inner join Docente d using(DocenteDNI) "
+                "where Dia=dayname(?)"
+            )
+            current_datetime -= datetime.timedelta(days=1)
+            db_cursor.execute(
+                query, (current_datetime.strftime("%Y-%m-%d"),),
+            )
+            report = db_cursor.fetchall()
+            # se formatea la lista de cursos
+            report = scad_utils.rowToDict(
+                (
+                    "AsignacionCursoID",
+                    "DocenteDNI",
+                    "Nombre",
+                    "Apellido",
+                    "CursoNombre",
+                    "HoraInicio",
+                    "HoraFin",
+                    "Pabellon",
+                    "Numero",
+                ),
+                report,
+            )
+            if len(report) > 0:
+                existence_check_query: str = (
+                    "select * from Marcacion " "where Fecha=? and AsignacionCursoID=?"
+                )
+                for assignment in report:
+                    db_cursor.execute(
+                        existence_check_query,
+                        (
+                            current_datetime.strftime("%Y-%m-%d"),
+                            assignment["AsignacionCursoID"],
+                        ),
+                    )
+                    if len(db_cursor.fetchall()) > 0:
+                        assignment["state"] = "marked"
+                    else:
+                        assignment["state"] = "not_marked"
+            db_cursor.close()
+            db_connection.close()
+            return make_response(jsonify(report), 200)
+        elif time_range == "this_week":
+            pass
+        elif time_range == "this_month":
+            pass
+        elif time_range == "all":
+            pass
+        else:
+            return make_response("peticion invalida", 406)
+    elif session["account_type"] == "Docente":
+        # el administrador no deberia usar este servicio
+        return make_response("ya nos jakiaron", 400)
 
 
 @app.route("/admin_add_teacher", methods=["POST"])
@@ -403,31 +522,6 @@ def adminGetCourseAssignmentTable() -> dict:
         return make_response("", 401)
 
 
-@app.route("/admin_create_calendar", methods=["POST"])
-def adminCreateCalendar() -> dict:
-    if "account_type" not in session:
-        return make_response("primero inicia session broz", 301)
-    else:
-        if session["account_type"] == "Administrador":
-            date_range = request.get_json()
-            db_connection = db.get_connection()
-            db_cursor = db_connection.cursor()
-            start = datetime.datetime.fromisoformat(date_range["start"])
-            end = datetime.datetime.fromisoformat(date_range["end"])
-            db_cursor.execute("DROP TABLE IF EXISTS Calendario")
-            db_cursor.execute("create table Calendario(Fecha date primary key)")
-            while start < end:
-                db_cursor.execute(
-                    "insert into Calendario() values(?)", (start.strftime("%Y-%m-%d"),)
-                )
-                start += datetime.timedelta(days=1)
-                db_cursor.close()
-                db_connection.close()
-                return make_response("se creo el calendario", 200)
-        elif session["account_type"] == "Docente":
-            return make_response("no", 401)
-
-
 @app.route("/logout", methods=["DELETE"])
 def logout() -> dict:
     if "account_type" not in session:
@@ -440,4 +534,11 @@ def logout() -> dict:
             return make_response("hasta luego prosor", 200)
         elif session["account_type"] == "Administrador":
             session.pop("Usuario")
+            return make_response("espero haberle sido util, hasta luego", 200)
+            return make_response("espero haberle sido util, hasta luego", 200)
+            return make_response("espero haberle sido util, hasta luego", 200)
+            return make_response("espero haberle sido util, hasta luego", 200)
+            return make_response("espero haberle sido util, hasta luego", 200)
+            return make_response("espero haberle sido util, hasta luego", 200)
+            return make_response("espero haberle sido util, hasta luego", 200)
             return make_response("espero haberle sido util, hasta luego", 200)

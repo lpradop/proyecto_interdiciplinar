@@ -1,7 +1,6 @@
 *
 !*.py
 !*.md
-!*.toml
 !*.png
 !*.otf
 !client_app/
@@ -9,3 +8,4 @@
 !server_app/
 !database/
 !.gitignore
+!*.sql
