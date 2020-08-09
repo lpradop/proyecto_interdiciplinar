@@ -17,10 +17,13 @@ import requests
 # response=requests.delete("http://127.0.0.1:5000/logout")
 s = requests.Session()
 response = s.post(
-    "http://127.0.0.1:5000/login",
-    json={"Usuario": "lpradop", "Contrasena": "lpradop"},
+    "http://127.0.0.1:5000/login", json={"Usuario": "brocolio", "Contrasena": "brocolio"},
 )
-# response= s.get("http://127.0.0.1:5000/teacher_fullname")
-response=s.get("http://127.0.0.1:5000/teacher_course_list")
-
+# response= s.get("http://127.0.0.1:5000/admin_get_teacher_table")
+response= s.get("http://127.0.0.1:5000/admin_get_course_assignment_table")
+# response = s.post(
+#     "http://127.0.0.1:5000/admin_create_calendar",
+#     json={"start": '2021-01-01', "end": '2021-05-01'},
+# )
 print(response.json())
+response= s.delete("http://127.0.0.1:5000/logout")
