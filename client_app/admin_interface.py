@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox
 import requests
 import os.path as path
+import xlsxwriter
+from documentFunctions import *
 
 
 def createAdminInterface(self) -> None:
@@ -21,6 +23,7 @@ def createAdminInterface(self) -> None:
             background="white",
             font="Verdana 12 bold",
             relief="flat",
+            command=lambda: download_today_registers(self),
         ),
     )
 
@@ -32,6 +35,7 @@ def createAdminInterface(self) -> None:
             background="white",
             font="Verdana 12 bold",
             relief="flat",
+            command=lambda: download_yesterday_registers (self),
         ),
     )
 
@@ -68,6 +72,54 @@ def createAdminInterface(self) -> None:
         ),
     )
 
+    button_teachers_list = (
+        tk.Button(
+            self.main_window,
+            text="Lista de Docentes",
+            fg="#63061F",
+            background="white",
+            font="Verdana 12 bold",
+            relief="flat",
+            command=lambda: download_teachers_list(self),
+        ),
+    )
+
+    button_subjects_list = (
+        tk.Button(
+            self.main_window,
+            text="Lista de Cursos",
+            fg="#63061F",
+            background="white",
+            font="Verdana 12 bold",
+            relief="flat",
+            command=lambda: download_subjects_list(self),
+        ),
+    )
+
+    button_classrooms_list = (
+        tk.Button(
+            self.main_window,
+            text="Lista de Salones",
+            fg="#63061F",
+            background="white",
+            font="Verdana 12 bold",
+            relief="flat",
+            command=lambda: download_classrooms_list(self),
+        ),
+    )
+
+    button_subject_assignment_list = (
+        tk.Button(
+            self.main_window,
+            text="Lista de Asignaciones de Cursos",
+            fg="#63061F",
+            background="white",
+            font="Verdana 12 bold",
+            relief="flat",
+            command=lambda: download_subject_assigment_list(self),
+        ),
+    )
+
     button_modify_database = (
         tk.Button(
             self.main_window,
@@ -99,6 +151,14 @@ def createAdminInterface(self) -> None:
             fill="white",
             anchor="nw",
         ),
+        self.canvas.create_text(
+            65,
+            390,
+            text="Descarga de registros por tablas:",
+            font="Verdana 23 bold",
+            fill="white",
+            anchor="nw",
+        ),
         self.canvas.create_window(
             150, 260, window=button_download_today, width=175, height=30
         ),
@@ -116,6 +176,18 @@ def createAdminInterface(self) -> None:
         ),
         self.canvas.create_window(
             650, 700, window=button_modify_database, width=120, height=30,
+        ),
+        self.canvas.create_window(
+            220, 460, window=button_teachers_list, width=300, height=30,
+        ),
+        self.canvas.create_window(
+            550, 460, window=button_subjects_list, width=300, height=30,
+        ),
+        self.canvas.create_window(
+            220, 520, window=button_classrooms_list, width=300, height=30,
+        ),
+        self.canvas.create_window(
+            550, 520, window=button_subject_assignment_list, width=300, height=30,
         ),
         self.canvas.create_text(
             350,

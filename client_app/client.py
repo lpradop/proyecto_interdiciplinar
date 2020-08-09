@@ -96,7 +96,7 @@ class Client:
         service_url = self.server_url + service
         try:
             if method == "GET":
-                return self.session.get(service_url)
+                return self.session.get(url=service_url, json=json)
             elif method == "POST":
                 return self.session.post(url=service_url, json=json)
             elif method == "DELETE":
@@ -136,5 +136,6 @@ class Client:
                 createModifySubjectAssigmentInterface(self)
             elif self.interface_state == "Agregar Salón":
                 createAddClassroomInterface(self)
+            # elif self.interface_state ==
 
         print(self.interface_state)

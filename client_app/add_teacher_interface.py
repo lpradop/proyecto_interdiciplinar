@@ -30,9 +30,9 @@ def createAddTeacherInterface(self) -> None:
             "Contrasena": str,
         }
 
-        data["DocenteDNI"] = fist_name_entry.get()
-        data["Nombre"] = last_name_entry.get()
-        data["Apellido"] = dni_entry.get()
+        data["DocenteDNI"] = dni_entry.get()
+        data["Nombre"] = fist_name_entry.get()
+        data["Apellido"] = last_name_entry.get()
         data["Usuario"] = username_entry.get()
         data["Contrasena"] = password_entry.get()
 
